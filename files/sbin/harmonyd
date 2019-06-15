@@ -78,6 +78,6 @@ BN_MA="/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh
 
 while [ 1 ]; do
   LD_LIBRARY_PATH=/usr/local/lib/harmony /usr/local/bin/harmony -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -is_genesis -is_archival -accounts $IDX
-  echo "harmony died, restartting in 30 seconts" >&2
+  echo "harmony died, restarting in 30 seconds" >&2
   sleep 30
 done
