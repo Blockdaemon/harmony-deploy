@@ -60,12 +60,12 @@
       name: harmony
       comment: Harmony Role Account
       create_home: true
-      home: /run/harmonyd
+      home: /home/harmony/
 
   - name: Make harmony user keystore
     become: true
     file:
-      path: /run/harmonyd/.hmy/keystore/
+      path: /home/harmony/.hmy/keystore/
       state: directory
       mode: '0755'
       owner: harmony
