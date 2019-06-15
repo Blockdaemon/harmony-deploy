@@ -30,7 +30,7 @@
     with_fileglob:
       - files/bin/lib*
 
-  - name: Install harmony daemon wrapper
+  - name: Install harmonyd daemon wrapper
     become: true
     copy:
       src: files/sbin/harmonyd
@@ -39,7 +39,7 @@
       owner: root
       group: root
 
-  - name: Install harmony daemon wrapper config
+  - name: Install harmonyd daemon wrapper config
     become: true
     template:
       src: templates/harmonyd.j2
@@ -48,7 +48,7 @@
       owner: harmony
       group: adm
 
-  - name: Install harmony systemd unit file
+  - name: Install harmonyd systemd unit file
     become: true
     copy:
       src: files/etc/systemd/system/harmony.service
@@ -56,6 +56,15 @@
       mode: '0644'
       owner: root
       group: root
+
+  - name: Make harmonyd pidfile directory
+    become: true
+    file:
+      path: /run/harmonyd/
+      state: directory
+      mode: '0755'
+      owner: harmony
+      group: harmony
 
   - name: Add harmony user
     become: true
