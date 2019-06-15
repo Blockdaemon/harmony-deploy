@@ -1,0 +1,16 @@
+# copy to /etc/systemd/system/
+[Unit]
+Description=Harmony One
+After=network-online.target
+
+[Service]
+User=harmony
+WorkingDirectory=/run/harmonyd
+PermissionsStartOnly=true
+ExecStart=/usr/local/sbin/harmonyd
+ExecStopPost=/bin/rm -f /run/harmonyd/harmonyd.pid
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+

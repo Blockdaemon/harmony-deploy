@@ -1,0 +1,79 @@
+---
+- hosts: all
+  gather_facts: true
+
+  tasks:
+  - include_vars:
+      file: secrets.json
+      name: secrets
+
+  - name: Install harmony bin
+    become: true
+    copy:
+      src: files/bin/harmony
+      dest: /usr/local/bin/
+      mode: '0755'
+      owner: root
+      group: root
+
+  - name: Install harmony libs
+    become: true
+    copy:
+      src: "{{ item }}"
+      dest: /usr/local/lib/harmony/
+      mode: '0755'
+      owner: root
+      group: root
+    with_fileglob:
+      - files/bin/lib*
+
+  - name: Install harmony daemon wrapper
+    become: true
+    copy:
+      src: files/sbin/harmonyd
+      dest: /usr/local/sbin/
+      mode: '0755'
+      owner: root
+      group: root
+
+  - name: Install harmony daemon wrapper config
+    become: true
+    template:
+      src: templates/harmonyd.j2
+      dest: /etc/default/harmonyd
+      mode: '0640'
+      owner: harmony
+      group: adm
+
+  - name: Install harmony systemd unit file
+    become: true
+    copy:
+      src: files/etc/systemd/system/harmony.service
+      dest: /etc/systemd/system/
+      mode: '0644'
+      owner: root
+      group: root
+
+  - name: Add harmony user
+    become: true
+    user:
+      name: harmony
+      comment: Harmony Role Account
+      create_home: true
+      home: /run/harmonyd
+
+  - name: Make harmony user keystore
+    become: true
+    file:
+      path: /run/harmonyd/.hmy/keystore/
+      state: directory
+      mode: '0755'
+      recurse: yes
+
+  - name: Enable harmony unit file
+    become: true
+    systemd:
+      name: harmony
+      daemon_reload: yes
+      enabled: yes
+      masked: no

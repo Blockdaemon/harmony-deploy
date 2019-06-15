@@ -1,0 +1,6 @@
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+
+[all]
+harmony-0.bdi.sh
+harmony-1.bdi.sh
