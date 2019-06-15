@@ -1,6 +1,7 @@
 # Harmony scripts
 
-Copy `secrets-example.json` to `secrets.json` and add account information
+Copy `addresses-example.json` to `addresses.json` and add public addresses
+Copy wallet keys to to `keystore/<hostname>/`
 
 Run playbook:
 

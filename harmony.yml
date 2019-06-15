@@ -3,9 +3,12 @@
   gather_facts: true
 
   tasks:
+  - set_fact:
+      bn_ma: "/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv,/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9"
+
   - include_vars:
-      file: secrets.json
-      name: secrets
+      file: addresses.json
+      name: addresses
 
   - name: Install harmony bin
     become: true
@@ -71,6 +74,17 @@
       owner: harmony
       group: harmony
       recurse: yes
+
+  - name: Add files to keystore
+    become: true
+    copy:
+      src: "{{ item }}"
+      dest: /home/harmony/.hmy/keystore/
+      mode: '0640'
+      owner: harmony
+      group: harmony
+    with_fileglob:
+      - keystore/{{ ansible_hostname }}/*
 
   - name: Enable harmony unit file
     become: true

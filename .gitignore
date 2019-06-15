@@ -1,4 +1,6 @@
 *.swp
 /*.retry
-/secrets.json
 /files/bin/harmony-update.out
+
+/addresses.json
+/keystore/*
