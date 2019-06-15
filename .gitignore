@@ -2,5 +2,6 @@
 /*.retry
 /files/bin/harmony-update.out
 
+/hosts
 /addresses.json
 /keystore/*
