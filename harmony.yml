@@ -68,6 +68,8 @@
       path: /run/harmonyd/.hmy/keystore/
       state: directory
       mode: '0755'
+      owner: harmony
+      group: harmony
       recurse: yes
 
   - name: Enable harmony unit file
