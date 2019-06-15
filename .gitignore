@@ -1,2 +1,4 @@
 *.swp
+/*.retry
 /secrets.json
+/files/bin/harmony-update.out
