@@ -3,4 +3,4 @@ ansible_python_interpreter=/usr/bin/python3
 
 [all]
 harmony0.example.com
-harmony0.example.com
+harmony1.example.com
