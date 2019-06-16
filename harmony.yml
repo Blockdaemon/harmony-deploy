@@ -7,8 +7,11 @@
       bn_ma: "/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv,/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9"
 
   - include_vars:
-      file: addresses.json
-      name: addresses
+      file: secrets.json
+      name: secrets
+
+  - set_fact:
+      secret: "{{ secrets[ansible_hostname] }}"
 
   - name: Install harmony bin
     become: true
@@ -44,9 +47,9 @@
     template:
       src: templates/harmonyd.j2
       dest: /etc/default/harmonyd
-      mode: '0640'
+      mode: '0600'
       owner: harmony
-      group: adm
+      group: harmony
 
   - name: Install harmonyd systemd unit file
     become: true

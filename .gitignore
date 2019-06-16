@@ -3,5 +3,5 @@
 /files/bin/harmony-update.out
 
 /hosts
-/addresses.json
+/secrets.json
 /keystore/*
