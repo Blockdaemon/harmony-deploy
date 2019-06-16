@@ -79,22 +79,20 @@
 
   - name: Make harmony user keystore
     become: true
+    become_user: harmony
     file:
       path: /home/harmony/.hmy/keystore/
       state: directory
       mode: '0755'
-      owner: harmony
-      group: harmony
       recurse: yes
 
   - name: Add files to keystore
     become: true
+    become_user: harmony
     copy:
       src: "{{ item }}"
       dest: /home/harmony/.hmy/keystore/
       mode: '0640'
-      owner: harmony
-      group: harmony
     with_fileglob:
       - keystore/{{ ansible_hostname }}/*
 
