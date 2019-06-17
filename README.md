@@ -18,5 +18,5 @@ To update:
 ```
 cd files/bin
 . update
-fakeroot node.sh -1 asdf
+git diff
 ```

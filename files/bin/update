@@ -1,1 +1,2 @@
 curl -LO https://harmony.one/node.sh
+echo asdf | fakeroot ./node.sh -1 asdf
