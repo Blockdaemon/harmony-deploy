@@ -16,7 +16,5 @@ ansible-playbook harmony.yml
 To update:
 
 ```
-cd files/bin
-. update
-git diff
+./update.sh
 ```
