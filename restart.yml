@@ -3,17 +3,8 @@
   gather_facts: true
 
   tasks:
-  - name: Stop harmony
+  - name: Restart harmony
     become: true
     systemd:
       name: harmony
-      state: stopped
-
-#  - name: Clear harmony db
-#   become: true
-
-  - name: Start harmony
-    become: true
-    systemd:
-      name: harmony
-      state: started
+      state: restarted

@@ -13,8 +13,26 @@ chmod og-r secrets.json keystore/*/*
 ansible-playbook harmony.yml
 ```
 
-To update:
+## Update binaries
 
 ```
 ./update.sh
+```
+
+## Restart Harmony
+
+```
+ansible-playbook restart.yml
+```
+
+## Restart Harmony after cleaning db (like ./node.sh -c)
+
+```
+ansible-playbook clean.yml
+```
+
+## To check balances on the node
+
+```
+./wallet.sh balances --address <public_address>
 ```

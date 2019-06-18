@@ -1,0 +1,33 @@
+---
+- hosts: all
+  gather_facts: true
+
+  tasks:
+  - name: Stop harmony
+    become: true
+    systemd:
+      name: harmony
+      state: stopped
+
+  - name: Remove db
+    become: true
+    become_user: harmony
+    shell: "rm -rf /home/harmony/harmony_db_*"
+    args:
+      warn: no
+
+  - name: Remove latest
+    become: true
+    become_user: harmony
+    file:
+      path: /home/harmony/{{ item }}
+      state: absent
+    with_items:
+      - latest
+#     - .hmykey
+
+  - name: Start harmony
+    become: true
+    systemd:
+      name: harmony
+      state: started
