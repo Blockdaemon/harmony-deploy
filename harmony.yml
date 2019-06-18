@@ -42,6 +42,15 @@
       owner: root
       group: root
 
+  - name: Add harmony user
+    become: true
+    user:
+      name: harmony
+      comment: Harmony Role Account
+      create_home: true
+      home: /home/harmony
+    ignore_errors: yes
+
   - name: Install harmonyd daemon wrapper config
     become: true
     template:
@@ -68,14 +77,6 @@
       mode: '0755'
       owner: harmony
       group: harmony
-
-  - name: Add harmony user
-    become: true
-    user:
-      name: harmony
-      comment: Harmony Role Account
-      create_home: true
-      home: /home/harmony/
 
   - name: Make harmony user keystore
     become: true
