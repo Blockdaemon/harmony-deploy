@@ -9,7 +9,7 @@ Install wallet and bls keys to `credentials/<hostname>/` into `keystore/` and `b
 Secure secrets and wallets, run playbook:
 
 ```
-chmod og-r secrets.json credentials/*/passphrase credentials/*/keystore/*
+chmod og-r -R credentials
 ansible-playbook harmony.yml
 ```
 
@@ -19,7 +19,7 @@ ansible-playbook harmony.yml
 ./update.sh
 ```
 
-## Restart Harmony
+## Start/restart Harmony
 
 ```
 ansible-playbook restart.yml
@@ -29,6 +29,23 @@ ansible-playbook restart.yml
 
 ```
 ansible-playbook clean.yml
+```
+
+## Stop Harmony
+
+```
+ansible-playbook stop.yml
+```
+
+## Fetch remote wallet in to local `credentials/`
+
+Edit fetch.yml and adjust the `wallet_user` fact to taste.
+
+**Note that the RESULTS ARE GLOBALLY READABLE FILES. Do not omit the `chmod` command below!!**
+
+```
+ansible-playbook fetch.yml
+chmod og-r -R credentials
 ```
 
 ## To check balances on the node
