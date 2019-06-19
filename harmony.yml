@@ -5,6 +5,9 @@
   tasks:
   - set_fact:
       bn_ma: "/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv,/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9"
+      # note this must match what is in etc/systemd/system/harmony.service
+      harmony_user: harmony
+
 
   - include_vars:
       file: secrets.json
@@ -45,10 +48,10 @@
   - name: Add harmony user
     become: true
     user:
-      name: harmony
+      name: "{{ harmony_user }}"
       comment: Harmony Role Account
       create_home: true
-      home: /home/harmony
+      home: "/home/{{ harmony_user }}"
     ignore_errors: yes
 
   - name: Install harmonyd daemon wrapper config
@@ -57,8 +60,8 @@
       src: templates/harmonyd.j2
       dest: /etc/default/harmonyd
       mode: '0600'
-      owner: harmony
-      group: harmony
+      owner: "{{ harmony_user }}"
+      group: "{{ harmony_user }}"
 
   - name: Install harmonyd systemd unit file
     become: true
@@ -75,24 +78,24 @@
       path: /run/harmonyd/
       state: directory
       mode: '0755'
-      owner: harmony
-      group: harmony
+      owner: "{{ harmony_user }}"
+      group: "{{ harmony_user }}"
 
   - name: Make harmony user keystore
     become: true
-    become_user: harmony
+    become_user: "{{ harmony_user }}"
     file:
-      path: /home/harmony/.hmy/keystore/
+      path: "/home/{{ harmony_user }}/.hmy/keystore/"
       state: directory
       mode: '0755'
       recurse: yes
 
   - name: Add files to keystore
     become: true
-    become_user: harmony
+    become_user: "{{ harmony_user }}"
     copy:
       src: "{{ item }}"
-      dest: /home/harmony/.hmy/keystore/
+      dest: "/home/{{ harmony_user }}/.hmy/keystore/"
       mode: '0640'
     with_fileglob:
       - keystore/{{ ansible_hostname }}/*
@@ -100,7 +103,7 @@
   - name: Enable harmony unit file
     become: true
     systemd:
-      name: harmony
+      name: "{{ harmony_user }}"
       daemon_reload: yes
       enabled: yes
       masked: no
