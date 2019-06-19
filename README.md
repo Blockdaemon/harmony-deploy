@@ -9,7 +9,7 @@ Install wallet and bls keys to `credentials/<hostname>/` into `keystore/` and `b
 Secure secrets and wallets, run playbook:
 
 ```
-chmod og-r -R credentials
+chmod og-rx -R credentials
 ansible-playbook harmony.yml
 ```
 
@@ -45,7 +45,7 @@ Edit fetch.yml and adjust the `wallet_user` fact to taste.
 
 ```
 ansible-playbook fetch.yml
-chmod og-r -R credentials
+chmod og-rx -R credentials
 ```
 
 ## To check balances on the node
