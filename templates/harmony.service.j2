@@ -4,8 +4,8 @@ Description=Harmony One
 After=network-online.target
 
 [Service]
-User=harmony
-WorkingDirectory=/home/harmony
+User={{ harmony_user }}
+WorkingDirectory=/home/{{ harmony_user }}
 PermissionsStartOnly=true
 ExecStart=/usr/local/sbin/harmonyd
 ExecStopPost=/bin/rm -f /run/harmonyd/harmonyd.pid
