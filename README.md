@@ -37,6 +37,12 @@ ansible-playbook clean.yml
 ansible-playbook stop.yml
 ```
 
+## Nuke Harmony database and user
+
+```
+ansible-playbook nuke.yml
+```
+
 ## Fetch remote wallet in to local `credentials/`
 
 Edit fetch.yml and adjust the `wallet_user` fact to taste.

@@ -1,0 +1,23 @@
+---
+- hosts: all
+  gather_facts: true
+
+  tasks:
+  - name: Stop harmony
+    become: true
+    systemd:
+      name: harmony
+      state: stopped
+
+  - name: Remove harmony user
+    become: true
+    user:
+      name: "{{ harmony_user }}"
+      state: absent
+    ignore_errors: yes
+
+  - name: Remove home dir
+    become: true
+    shell: "rm -rf {{ harmony_home }}"
+    args:
+      warn: no

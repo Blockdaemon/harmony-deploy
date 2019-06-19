@@ -5,7 +5,7 @@ After=network-online.target
 
 [Service]
 User={{ harmony_user }}
-WorkingDirectory=/home/{{ harmony_user }}
+WorkingDirectory={{ harmony_home }}
 PermissionsStartOnly=true
 ExecStart=/usr/local/sbin/harmonyd
 ExecStopPost=/bin/rm -f /run/harmonyd/harmonyd.pid

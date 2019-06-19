@@ -12,7 +12,7 @@
   - name: Remove db
     become: true
     become_user: harmony
-    shell: "rm -rf /home/harmony/harmony_db_*"
+    shell: "rm -rf {{ harmony_home }}/harmony_db_*"
     args:
       warn: no
 
@@ -20,11 +20,11 @@
     become: true
     become_user: harmony
     file:
-      path: /home/harmony/{{ item }}
+      path: "{{ harmony_home }}/{{ item }}"
       state: absent
     with_items:
       - latest
-#     - .hmykey
+      - .hmykey
 
   - name: Start harmony
     become: true

@@ -5,7 +5,6 @@
   tasks:
   - set_fact:
       bn_ma: "/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv,/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9"
-      harmony_user: harmony
 
   - name: Install harmony bin
     become: true
@@ -36,15 +35,6 @@
       owner: root
       group: root
 
-  - name: Add harmony user
-    become: true
-    user:
-      name: "{{ harmony_user }}"
-      comment: Harmony Role Account
-      create_home: true
-      home: "/home/{{ harmony_user }}"
-    ignore_errors: yes
-
   - name: Install harmonyd daemon wrapper config
     become: true
     template:
@@ -63,6 +53,26 @@
       owner: root
       group: root
 
+  - name: Make harmony home directory parent
+    become: true
+    file:
+      path: '{{ harmony_home.split("/")[0:-1]|join("/") }}'
+      state: directory
+      mode: '0755'
+      # this chowns all children to root. Don't do it.
+#     owner: root
+#     group: root
+      recurse: yes
+
+  - name: Add harmony user
+    become: true
+    user:
+      name: "{{ harmony_user }}"
+      comment: Harmony Role Account
+      create_home: true
+      home: "{{ harmony_home }}"
+    ignore_errors: yes
+
   - name: Make harmonyd pidfile directory
     become: true
     file:
@@ -76,7 +86,7 @@
     become: true
     become_user: "{{ harmony_user }}"
     file:
-      path: "/home/{{ harmony_user }}/.hmy/keystore/"
+      path: "{{ harmony_home }}/.hmy/keystore/"
       state: directory
       mode: '0755'
       recurse: yes
@@ -86,8 +96,8 @@
     become_user: "{{ harmony_user }}"
     copy:
       src: "{{ item }}"
-      dest: "/home/{{ harmony_user }}/.hmy/keystore/"
-      mode: '0640'
+      dest: "{{ harmony_home }}/.hmy/keystore/"
+      mode: '0600'
     with_fileglob:
       - credentials/{{ ansible_hostname }}/keystore/*
 
@@ -96,20 +106,21 @@
     become_user: "{{ harmony_user }}"
     copy:
       src: "{{ item }}"
-      dest: "/home/{{ harmony_user }}/{{ item | basename }}"
-      mode: '0640'
+      dest: "{{ harmony_home }}/{{ item | basename }}"
+      mode: '0644'
     with_fileglob:
       - credentials/{{ ansible_hostname }}/bls/UTC--*Z--bls_*
 
-  - set_fact:
-      passphrase_file: "credentials/{{ ansible_hostname }}/passphrase"
+# - set_fact:
+#     passphrase_file: "credentials/{{ ansible_hostname }}/passphrase"
 
   - name: Send passphrase
     become: true
     become_user: "{{ harmony_user }}"
     copy:
-      content: "{{ lookup('file',passphrase_file) | trim }}"
-      dest: "/home/{{ harmony_user }}/.passphrase"
+      #content: "{{ lookup('file',passphrase_file) | trim }}"
+      src: "credentials/{{ ansible_hostname }}/passphrase"
+      dest: "{{ harmony_home }}/.passphrase"
       mode: '0600'
 
   - name: Enable harmony unit file
