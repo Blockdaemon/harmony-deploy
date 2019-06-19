@@ -4,4 +4,4 @@
 
 /hosts
 /secrets.json
-/keystore/*
+/credentials

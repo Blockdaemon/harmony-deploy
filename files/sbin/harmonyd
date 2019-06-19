@@ -71,10 +71,16 @@ function myip() {
 NODE_PORT=9000
 PUB_IP=
 
+# poorly emulate upstream node.sh
+pattern="UTC--*Z--bls_*"
+blsfiles=( $pattern )
+BLSKEYFILE=${blsfiles[0]}
+echo "found ${BLSKEYFILE}" >&2
+
 myip
 
 while [ 1 ]; do
-  echo -n "${PASSPHRASE}" | LD_LIBRARY_PATH=/usr/local/lib/harmony /usr/local/bin/harmony -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -is_genesis -is_archival -accounts $IDX -pass stdin
+  echo -n "${PASSPHRASE}" | LD_LIBRARY_PATH=/usr/local/lib/harmony /usr/local/bin/harmony -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -is_genesis -blskey_file "${BLSKEYFILE}" -blspass stdin
   echo "harmony died, restarting in 30 seconds" >&2
   sleep 30
 done

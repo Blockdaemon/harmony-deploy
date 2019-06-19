@@ -90,7 +90,7 @@
       mode: '0755'
       recurse: yes
 
-  - name: Add files to keystore
+  - name: Send keystore file(s)
     become: true
     become_user: "{{ harmony_user }}"
     copy:
@@ -98,7 +98,17 @@
       dest: "/home/{{ harmony_user }}/.hmy/keystore/"
       mode: '0640'
     with_fileglob:
-      - keystore/{{ ansible_hostname }}/*
+      - credentials/{{ ansible_hostname }}/keystore/*
+
+  - name: Send BLS
+    become: true
+    become_user: "{{ harmony_user }}"
+    copy:
+      src: "{{ item }}"
+      dest: "/home/{{ harmony_user }}/{{ item | basename }}"
+      mode: '0640'
+    with_fileglob:
+      - credentials/{{ ansible_hostname }}/bls/UTC--*Z--bls_*
 
   - name: Enable harmony unit file
     become: true

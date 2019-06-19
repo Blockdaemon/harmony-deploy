@@ -16,7 +16,7 @@
     become: true
     fetch:
       src: "{{ item.path }}"
-      dest: "keystore/{{ ansible_hostname }}/"
+      dest: "credentials/{{ ansible_hostname }}/keystore/"
       flat: true
     with_items: "{{ keystore.files }}"
 
@@ -24,13 +24,13 @@
     become: true
     find:
       paths: "/home/{{ wallet_user }}"
-      patterns: "UTC--*--bls_*"
+      patterns: "UTC--*Z--bls_*"
     register: bls
 
   - name: Fetch BLS
     become: true
     fetch:
       src: "{{ item.path }}"
-      dest: "keystore/{{ ansible_hostname }}/"
+      dest: "credentials/{{ ansible_hostname }}/bls/"
       flat: true
     with_items: "{{ bls.files }}"
