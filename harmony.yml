@@ -8,14 +8,6 @@
       # note this must match what is in etc/systemd/system/harmony.service
       harmony_user: harmony
 
-
-  - include_vars:
-      file: secrets.json
-      name: secrets
-
-  - set_fact:
-      secret: "{{ secrets[ansible_hostname] }}"
-
   - name: Install harmony bin
     become: true
     copy:
@@ -59,9 +51,9 @@
     template:
       src: templates/harmonyd.j2
       dest: /etc/default/harmonyd
-      mode: '0600'
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
+      mode: '0644'
+      owner: root
+      group: root
 
   - name: Install harmonyd systemd unit file
     become: true
@@ -109,6 +101,17 @@
       mode: '0640'
     with_fileglob:
       - credentials/{{ ansible_hostname }}/bls/UTC--*Z--bls_*
+
+  - set_fact:
+      passphrase_file: "credentials/{{ ansible_hostname }}/passphrase"
+
+  - name: Send passphrase
+    become: true
+    become_user: "{{ harmony_user }}"
+    copy:
+      content: "{{ lookup('file',passphrase_file) | trim }}"
+      dest: "/home/{{ harmony_user }}/.passphrase"
+      mode: '0600'
 
   - name: Enable harmony unit file
     become: true

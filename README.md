@@ -2,14 +2,14 @@
 
 Copy `hosts-example` to `hosts` and configure the remote hosts
 
-Copy `secrets-example.json` to `secrets.json` and add public addresses and wallet passphrases
+Copy passphrase into `credentials/<hostname>/passphrase`
 
 Install wallet and bls keys to `credentials/<hostname>/` into `keystore/` and `bls/` respectively
 
 Secure secrets and wallets, run playbook:
 
 ```
-chmod og-r secrets.json credentials/*/keystore/*
+chmod og-r secrets.json credentials/*/passphrase credentials/*/keystore/*
 ansible-playbook harmony.yml
 ```
 

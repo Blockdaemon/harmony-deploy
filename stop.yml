@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: true
+
+  tasks:
+  - name: Stop harmony
+    become: true
+    systemd:
+      name: harmony
+      state: stopped
