@@ -4,7 +4,7 @@ Copy `hosts-example` to `hosts` and configure the remote hosts
 
 Copy `secrets-example.json` to `secrets.json` and add public addresses and wallet passphrases
 
-Copy wallet keys to to `keystore/<hostname>/`
+Install wallet AND bls keys to to `keystore/<hostname>/`
 
 Secure secrets and wallets, run playbook:
 

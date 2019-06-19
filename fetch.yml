@@ -1,0 +1,36 @@
+---
+- hosts: all
+  gather_facts: true
+
+  tasks:
+  - set_fact:
+      wallet_user: bdi
+
+  - name: Get keystore filenames
+    become: true
+    find:
+      paths: "/home/{{ wallet_user }}/.hmy/keystore"
+    register: keystore
+
+  - name: Fetch keystore
+    become: true
+    fetch:
+      src: "{{ item.path }}"
+      dest: "keystore/{{ ansible_hostname }}/"
+      flat: true
+    with_items: "{{ keystore.files }}"
+
+  - name: Get BLS filenames
+    become: true
+    find:
+      paths: "/home/{{ wallet_user }}"
+      patterns: "UTC--*--bls_*"
+    register: bls
+
+  - name: Fetch BLS
+    become: true
+    fetch:
+      src: "{{ item.path }}"
+      dest: "keystore/{{ ansible_hostname }}/"
+      flat: true
+    with_items: "{{ bls.files }}"
