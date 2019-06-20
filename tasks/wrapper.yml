@@ -26,6 +26,7 @@
       mode: '0755'
       owner: root
       group: root
+    notify: "systemd reload"
 
   - name: Install harmonyd systemd unit file
     template:
