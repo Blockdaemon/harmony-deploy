@@ -1,23 +1,21 @@
 ---
 - hosts: all
   gather_facts: true
+  become: true
 
   tasks:
   - name: Stop harmony
-    become: true
     systemd:
       name: harmony
       state: stopped
 
   - name: Remove db
-    become: true
     become_user: harmony
     shell: "rm -rf {{ harmony_home }}/harmony_db_*"
     args:
       warn: no
 
   - name: Remove latest
-    become: true
     become_user: harmony
     file:
       path: "{{ harmony_home }}/{{ item }}"
@@ -27,7 +25,6 @@
       - .hmykey
 
   - name: Start harmony
-    become: true
     systemd:
       name: harmony
       state: started

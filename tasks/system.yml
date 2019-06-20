@@ -1,6 +1,5 @@
 ---
   - name: Install harmonyd sysctl.d file
-    become: true
     copy:
       src: files/etc/sysctl.d/harmony-sysctl.conf
       dest: /etc/sysctl.d/99-harmony.conf
@@ -10,7 +9,6 @@
     notify: "sysctl reload"
 
   - name: Increase default nproc for systemd services
-    become: true
     replace:
       path: /etc/systemd/system.conf
       regexp: '^#*DefaultLimitNPROC=.*'
@@ -19,7 +17,6 @@
     notify: "systemd reload"
 
   - name: Increase default nofiles for systemd services
-    become: true
     replace:
       path: /etc/systemd/system.conf
       regexp: '^#*DefaultLimitNOFILE=.*'

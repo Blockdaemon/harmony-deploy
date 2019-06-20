@@ -1,6 +1,5 @@
 ---
   - name: Make harmony home directory parent
-    become: true
     file:
       path: '{{ harmony_home.split("/")[0:-1]|join("/") }}'
       state: directory
@@ -11,7 +10,6 @@
       recurse: yes
 
   - name: Add harmony user
-    become: true
     user:
       name: "{{ harmony_user }}"
       comment: Harmony Role Account
@@ -21,7 +19,6 @@
     ignore_errors: yes
 
   - name: Make harmony user keystore
-    become: true
     become_user: "{{ harmony_user }}"
     file:
       path: "{{ harmony_home }}/.hmy/keystore/"
@@ -30,7 +27,6 @@
       recurse: yes
 
   - name: Send keystore file(s)
-    become: true
     become_user: "{{ harmony_user }}"
     copy:
       src: "{{ item }}"
@@ -40,7 +36,6 @@
       - credentials/{{ ansible_hostname }}/keystore/*
 
   - name: Send BLS
-    become: true
     become_user: "{{ harmony_user }}"
     copy:
       src: "{{ item }}"
@@ -53,7 +48,6 @@
 #     passphrase_file: "credentials/{{ ansible_hostname }}/passphrase"
 
   - name: Send passphrase
-    become: true
     become_user: "{{ harmony_user }}"
     copy:
       #content: "{{ lookup('file',passphrase_file) | trim }}"

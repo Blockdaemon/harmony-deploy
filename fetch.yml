@@ -1,16 +1,15 @@
 ---
 - hosts: all
   gather_facts: true
+  become: true
 
   tasks:
   - name: Get keystore filenames
-    become: true
     find:
       paths: "{{ wallet_home }}/.hmy/keystore"
     register: keystore
 
   - name: Fetch keystore
-    become: true
     fetch:
       src: "{{ item.path }}"
       dest: "credentials/{{ ansible_hostname }}/keystore/"
@@ -18,14 +17,12 @@
     with_items: "{{ keystore.files }}"
 
   - name: Get BLS filenames
-    become: true
     find:
       paths: "{{ wallet_home }}"
       patterns: "UTC--*Z--bls_*"
     register: bls
 
   - name: Fetch BLS
-    become: true
     fetch:
       src: "{{ item.path }}"
       dest: "credentials/{{ ansible_hostname }}/bls/"

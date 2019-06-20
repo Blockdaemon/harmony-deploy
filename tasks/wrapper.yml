@@ -4,7 +4,6 @@
       bn_ma: "/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv,/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9"
 
   - name: Install harmonyd daemon wrapper config
-    become: true
     template:
       src: templates/harmonyd.j2
       dest: /etc/default/harmonyd
@@ -13,7 +12,6 @@
       group: root
 
   - name: Make harmonyd pidfile directory
-    become: true
     file:
       path: /run/harmonyd/
       state: directory
@@ -22,7 +20,6 @@
       group: "{{ harmony_user }}"
 
   - name: Install harmonyd daemon wrapper
-    become: true
     copy:
       src: files/sbin/harmonyd
       dest: /usr/local/sbin/
@@ -31,7 +28,6 @@
       group: root
 
   - name: Install harmonyd systemd unit file
-    become: true
     template:
       src: templates/harmony.service.j2
       dest: /etc/systemd/system/harmony.service
@@ -41,7 +37,6 @@
     notify: "systemd reload"
 
   - name: Enable harmony unit file
-    become: true
     systemd:
       name: "{{ harmony_user }}"
       enabled: yes
