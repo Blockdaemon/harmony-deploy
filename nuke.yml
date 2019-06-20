@@ -2,12 +2,57 @@
 - hosts: all
   gather_facts: true
 
+  handlers:
+  - name: systemd reload handler
+    become: true
+    systemd:
+      daemon_reload: yes
+    listen: "systemd reload"
+
   tasks:
   - name: Stop harmony
     become: true
     systemd:
       name: harmony
       state: stopped
+
+  - name: Disable harmony unit file
+    become: true
+    systemd:
+      name: "{{ harmony_user }}"
+      enabled: no
+      masked: no
+
+  - name: Remove harmonyd systemd unit file
+    become: true
+    file:
+      name: /etc/systemd/system/harmony.service
+      state: absent
+    notify: "systemd reload"
+
+  - name: Remove harmony lib dir
+    become: true
+    shell: "rm -rf /usr/local/lib/harmony"
+    args:
+      warn: no
+
+  - name: Remove harmony bin
+    become: true
+    file:
+      name: "/usr/local/bin/harmony"
+      state: absent
+
+  - name: Remove harmonyd wrapper and sysctl config
+    become: true
+    file:
+      name: "{{ item }}"
+      state: absent
+    with_items:
+      - "/usr/local/sbin/harmonyd"
+      - "/etc/default/harmonyd"
+      - "/etc/sysctl.d/99-harmony.conf"
+
+  # TODO: revert systemd NPROC and NOFILES
 
   - name: Remove harmony user
     become: true

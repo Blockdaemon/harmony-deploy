@@ -1,0 +1,29 @@
+  - import_tasks: tasks/wrapper.yml # required to stop harmony service
+
+  # stop harmony before trying to install upstream
+  - name: Stop harmony
+    become: true
+    systemd:
+      name: harmony
+      state: stopped
+    ignore_errors: yes
+
+  - name: Install harmony bin
+    become: true
+    copy:
+      src: files/bin/harmony
+      dest: /usr/local/bin/
+      mode: '0755'
+      owner: root
+      group: root
+
+  - name: Install harmony libs
+    become: true
+    copy:
+      src: "{{ item }}"
+      dest: /usr/local/lib/harmony/
+      mode: '0755'
+      owner: root
+      group: root
+    with_fileglob:
+      - files/bin/lib*
