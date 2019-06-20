@@ -80,7 +80,7 @@ echo "found ${BLSKEYFILE}" >&2
 myip
 
 while [ 1 ]; do
-  LD_LIBRARY_PATH=/usr/local/lib/harmony /usr/local/bin/harmony -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -is_genesis -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase
+  LD_LIBRARY_PATH=. ./harmony -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -is_genesis -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase
   echo "harmony died, restarting in 30 seconds" >&2
   sleep 30
 done

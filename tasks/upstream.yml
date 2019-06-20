@@ -10,7 +10,7 @@
   - name: Install harmony bin
     copy:
       src: files/bin/harmony
-      dest: /usr/local/bin/
+      dest: "{{ harmony_home }}"
       mode: '0755'
       owner: root
       group: root
@@ -18,7 +18,7 @@
   - name: Install harmony libs
     copy:
       src: "{{ item }}"
-      dest: /usr/local/lib/harmony/
+      dest: "{{ harmony_home }}"
       mode: '0755'
       owner: root
       group: root
