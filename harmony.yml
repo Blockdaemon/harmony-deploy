@@ -6,6 +6,23 @@
   - set_fact:
       bn_ma: "/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv,/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9"
 
+  - name: Install harmonyd systemd unit file
+    become: true
+    template:
+      src: templates/harmony.service.j2
+      dest: /etc/systemd/system/harmony.service
+      mode: '0644'
+      owner: root
+      group: root
+
+  - name: Stop harmony
+    become: true
+    systemd:
+      name: harmony
+      state: stopped
+      daemon_reload: yes
+    ignore_errors: yes
+
   - name: Install harmony bin
     become: true
     copy:
@@ -40,15 +57,6 @@
     template:
       src: templates/harmonyd.j2
       dest: /etc/default/harmonyd
-      mode: '0644'
-      owner: root
-      group: root
-
-  - name: Install harmonyd systemd unit file
-    become: true
-    template:
-      src: templates/harmony.service.j2
-      dest: /etc/systemd/system/harmony.service
       mode: '0644'
       owner: root
       group: root
