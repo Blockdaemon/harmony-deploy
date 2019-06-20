@@ -1,0 +1,70 @@
+---
+  - name: Make harmony home directory parent
+    become: true
+    file:
+      path: '{{ harmony_home.split("/")[0:-1]|join("/") }}'
+      state: directory
+      mode: '0755'
+      # this chowns all children to root. Don't do it.
+#     owner: root
+#     group: root
+      recurse: yes
+
+  - name: Add harmony user
+    become: true
+    user:
+      name: "{{ harmony_user }}"
+      comment: Harmony Role Account
+      create_home: true
+      home: "{{ harmony_home }}"
+    ignore_errors: yes
+
+  - name: Make harmonyd pidfile directory
+    become: true
+    file:
+      path: /run/harmonyd/
+      state: directory
+      mode: '0755'
+      owner: "{{ harmony_user }}"
+      group: "{{ harmony_user }}"
+
+  - name: Make harmony user keystore
+    become: true
+    become_user: "{{ harmony_user }}"
+    file:
+      path: "{{ harmony_home }}/.hmy/keystore/"
+      state: directory
+      mode: '0755'
+      recurse: yes
+
+  - name: Send keystore file(s)
+    become: true
+    become_user: "{{ harmony_user }}"
+    copy:
+      src: "{{ item }}"
+      dest: "{{ harmony_home }}/.hmy/keystore/"
+      mode: '0600'
+    with_fileglob:
+      - credentials/{{ ansible_hostname }}/keystore/*
+
+  - name: Send BLS
+    become: true
+    become_user: "{{ harmony_user }}"
+    copy:
+      src: "{{ item }}"
+      dest: "{{ harmony_home }}/{{ item | basename }}"
+      mode: '0644'
+    with_fileglob:
+      - credentials/{{ ansible_hostname }}/bls/UTC--*Z--bls_*
+
+# - set_fact:
+#     passphrase_file: "credentials/{{ ansible_hostname }}/passphrase"
+
+  - name: Send passphrase
+    become: true
+    become_user: "{{ harmony_user }}"
+    copy:
+      #content: "{{ lookup('file',passphrase_file) | trim }}"
+      src: "credentials/{{ ansible_hostname }}/passphrase"
+      dest: "{{ harmony_home }}/.passphrase"
+      mode: '0600'
