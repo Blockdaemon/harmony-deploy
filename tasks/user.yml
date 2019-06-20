@@ -17,6 +17,7 @@
       comment: Harmony Role Account
       create_home: true
       home: "{{ harmony_home }}"
+      shell: "/bin/bash"
     ignore_errors: yes
 
   - name: Make harmonyd pidfile directory
