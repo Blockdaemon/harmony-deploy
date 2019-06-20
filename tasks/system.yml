@@ -7,10 +7,7 @@
       mode: '0644'
       owner: root
       group: root
-
-  - name: Reload sysctl
-    become: true
-    command: "/sbin/sysctl -p /etc/sysctl.d/99-harmony.conf"
+    notify: "sysctl reload"
 
   - name: Increase default nproc for systemd services
     become: true

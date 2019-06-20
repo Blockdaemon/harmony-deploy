@@ -9,6 +9,11 @@
       daemon_reload: yes
     listen: "systemd reload"
 
+  - name: Reload sysctl
+    become: true
+    command: "/sbin/sysctl -p /etc/sysctl.d/99-harmony.conf"
+    listen: "sysctl reload"
+
   tasks:
   - import_tasks: tasks/system.yml
 
@@ -30,7 +35,6 @@
     systemd:
       name: harmony
       state: stopped
-      daemon_reload: yes
     ignore_errors: yes
 
   - name: Install harmony bin
