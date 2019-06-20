@@ -47,11 +47,8 @@ ansible-playbook nuke.yml
 
 Edit fetch.yml and adjust the `wallet_user` fact to taste.
 
-**Note that the RESULTS ARE GLOBALLY READABLE FILES. Do not omit the `chmod` command below!!**
-
 ```
 ansible-playbook fetch.yml
-chmod og-rx -R credentials
 ```
 
 ## To check balances on the node

@@ -3,13 +3,10 @@
   gather_facts: true
 
   tasks:
-  - set_fact:
-      wallet_user: bdi
-
   - name: Get keystore filenames
     become: true
     find:
-      paths: "/home/{{ wallet_user }}/.hmy/keystore"
+      paths: "{{ wallet_home }}/.hmy/keystore"
     register: keystore
 
   - name: Fetch keystore
@@ -23,7 +20,7 @@
   - name: Get BLS filenames
     become: true
     find:
-      paths: "/home/{{ wallet_user }}"
+      paths: "{{ wallet_home }}"
       patterns: "UTC--*Z--bls_*"
     register: bls
 
@@ -34,3 +31,6 @@
       dest: "credentials/{{ ansible_hostname }}/bls/"
       flat: true
     with_items: "{{ bls.files }}"
+
+  - name: Fix permissions
+    local_action: file path="credentials" mode=og-rx recurse=true
