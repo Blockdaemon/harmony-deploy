@@ -4,4 +4,4 @@ shard="$1 "
 else
 shard=""
 fi
-curl -Ss https://harmony.one/balances | sed '/.*gn-keys.*/q' | grep ^one | sort -rnk 3 | grep " $shard" | head
+curl -LSs https://harmony.one/balances | sed '/.*gn-keys.*/q' | grep ^one | sort -rnk 4 | grep " $shard" | head
