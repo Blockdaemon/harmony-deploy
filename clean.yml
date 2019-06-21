@@ -9,20 +9,11 @@
       name: harmony
       state: stopped
 
-  - name: Remove db
+  - name: Remove db, latest, and .hmykey
     become_user: harmony
-    shell: "rm -rf {{ harmony_home }}/harmony_db_*"
+    shell: "rm -rf {{ harmony_home }}/harmony_db_* {{ harmony_home }}/latest/* {{ harmony_home }}/.hmykey"
     args:
       warn: no
-
-  - name: Remove latest
-    become_user: harmony
-    file:
-      path: "{{ harmony_home }}/{{ item }}"
-      state: absent
-    with_items:
-      - latest
-      - .hmykey
 
   - name: Start harmony
     systemd:
