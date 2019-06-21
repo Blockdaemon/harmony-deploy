@@ -8,14 +8,6 @@
       group: root
     notify: "sysctl reload"
 
-  - name: Increase default nproc for systemd services
-    replace:
-      path: /etc/systemd/system.conf
-      regexp: '^#*DefaultLimitNPROC=.*'
-      replace: 'DefaultLimitNPROC=65535'
-      backup: yes
-    notify: "systemd reload"
-
   - name: Increase default nofiles for systemd services
     replace:
       path: /etc/systemd/system.conf
