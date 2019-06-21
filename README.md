@@ -45,7 +45,7 @@ ansible-playbook nuke.yml
 
 ## Fetch remote wallet in to local `credentials/`
 
-Edit fetch.yml and adjust the `wallet_home` fact to taste.
+Edit `hosts` and adjust the `wallet_home` fact to taste.
 
 ```
 ansible-playbook fetch.yml
