@@ -7,13 +7,19 @@
       state: stopped
     ignore_errors: yes
 
-  - name: Install harmony bin
+  - name: Install harmony bins
     copy:
-      src: files/bin/harmony
+      src: "files/bin/{{ item }}"
       dest: "{{ harmony_home }}"
       mode: '0755'
       owner: root
       group: root
+    with_items:
+      - harmony
+      - wallet
+      - node.sh
+      - wallet.sh
+      - mystatus.sh
 
   - name: Install harmony libs
     copy:

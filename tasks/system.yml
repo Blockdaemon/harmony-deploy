@@ -15,3 +15,8 @@
       replace: 'DefaultLimitNOFILE=65535'
       backup: yes
     notify: "systemd reload"
+
+  - name: Install jq
+    apt:
+      name: jq
+      update_cache: yes
