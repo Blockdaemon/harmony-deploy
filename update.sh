@@ -1,7 +1,7 @@
 #!/bin/bash
 pushd files/bin
 for i in node wallet mystatus; do
-  curl -LO https://harmony.one/$i.sh
+  curl -SsLO https://harmony.one/$i.sh
   chmod +x $i.sh
 done
 ./wallet.sh -d
