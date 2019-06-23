@@ -3,7 +3,7 @@
     copy:
       src: "files/bin/{{ item }}"
       dest: "{{ harmony_home }}/staging"
-      mode: '0755'
+      mode: preserve
     with_items:
       - harmony
       - wallet
@@ -16,7 +16,7 @@
     copy:
       src: "{{ item }}"
       dest: "{{ harmony_home }}/staging"
-      mode: '0755'
+      mode: preserve
     with_fileglob:
       - files/bin/lib*
 
