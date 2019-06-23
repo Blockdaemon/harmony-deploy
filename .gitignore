@@ -1,6 +1,13 @@
 *.swp
 /*.retry
+/files/bin/harmony
 /files/bin/harmony-update.out
+/files/bin/libbls384_256.so
+/files/bin/libcrypto.so.10
+/files/bin/libgmp.so.10
+/files/bin/libgmpxx.so.4
+/files/bin/libmcl.so
+/files/bin/wallet
 
 /hosts
 /credentials
