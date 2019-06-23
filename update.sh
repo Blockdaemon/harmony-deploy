@@ -5,6 +5,6 @@ for i in node wallet mystatus; do
   chmod +x $i.sh
 done
 ./wallet.sh -d
-echo asdf | fakeroot ./node.sh -1 -k asdf <> /dev/null 2>&1
+echo asdf | ./node.sh -S -1 -k asdf <> /dev/null 2>&1
 git diff harmony-checksums.txt
 popd
