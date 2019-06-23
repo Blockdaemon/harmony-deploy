@@ -1,0 +1,29 @@
+  - name: Install harmony bins to staging
+    become_user: "{{ harmony_user }}"
+    copy:
+      src: "files/bin/{{ item }}"
+      dest: "{{ harmony_home }}/staging"
+      mode: '0755'
+    with_items:
+      - harmony
+      - wallet
+      - node.sh
+      - wallet.sh
+      - mystatus.sh
+
+  - name: Install harmony libs to staging
+    become_user: "{{ harmony_user }}"
+    copy:
+      src: "{{ item }}"
+      dest: "{{ harmony_home }}/staging"
+      mode: '0755'
+    with_fileglob:
+      - files/bin/lib*
+
+  - name: Install harmony checksum file to staging
+    become_user: "{{ harmony_user }}"
+    copy:
+      src: "files/bin/harmony-checksums.txt"
+      dest: "{{ harmony_home }}/staging"
+      mode: preserve
+    register: staging_checksum

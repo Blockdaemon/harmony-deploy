@@ -1,0 +1,26 @@
+  - name: Get list of staging files
+    find:
+      paths: "{{ harmony_home }}/staging/"
+    register: staging_find
+
+  # Stop harmony so we can update the binaries
+  - name: Stop harmony
+    systemd:
+      name: harmony
+      state: stopped
+    register: harmony_stopped
+
+  - name: Update harmony files from staging
+    copy:
+      src: "{{ item.path}}"
+      dest: "{{ harmony_home }}/"
+      remote_src: true
+      mode: preserve
+    with_items: "{{ staging_find.files }}"
+
+  # Only start harmony if we stopped it above
+  - name: Start harmony
+    systemd:
+      name: harmony
+      state: restarted
+    when: harmony_stopped.changed

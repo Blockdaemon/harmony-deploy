@@ -4,10 +4,6 @@
       path: '{{ harmony_home.split("/")[0:-1]|join("/") }}'
       state: directory
       mode: '0755'
-      # this chowns all children to root. Don't do it.
-#     owner: root
-#     group: root
-      recurse: yes
 
   - name: Add harmony user
     user:
@@ -18,13 +14,19 @@
       shell: "/bin/bash"
     ignore_errors: yes
 
+  - name: Make harmony staging directory
+    become_user: "{{ harmony_user }}"
+    file:
+      path: "{{ harmony_home }}/staging"
+      state: directory
+      mode: '0755'
+
   - name: Make harmony user keystore
     become_user: "{{ harmony_user }}"
     file:
       path: "{{ harmony_home }}/.hmy/keystore/"
       state: directory
       mode: '0755'
-      recurse: yes
 
   - name: Send keystore file(s)
     become_user: "{{ harmony_user }}"

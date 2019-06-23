@@ -15,4 +15,7 @@
 
   tasks:
   - import_tasks: tasks/system.yml
-  - import_tasks: tasks/upstream.yml
+  - import_tasks: tasks/wrapper.yml
+  - import_tasks: tasks/staging.yml
+  - import_tasks: tasks/update.yml
+    when: staging_checksum.changed
