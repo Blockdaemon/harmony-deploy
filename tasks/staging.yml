@@ -10,6 +10,7 @@
       - node.sh
       - wallet.sh
       - mystatus.sh
+    register: staging_bins
 
   - name: Install harmony libs to staging
     become_user: "{{ harmony_user }}"
@@ -19,6 +20,7 @@
       mode: preserve
     with_fileglob:
       - files/bin/lib*
+    register: staging_libs
 
   - name: Install harmony checksum file to staging
     become_user: "{{ harmony_user }}"

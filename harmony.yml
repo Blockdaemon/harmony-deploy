@@ -18,4 +18,4 @@
   - import_tasks: tasks/wrapper.yml
   - import_tasks: tasks/staging.yml
   - import_tasks: tasks/update.yml
-    when: staging_checksum.changed
+    when: staging_bins.changed or staging_libs.changed or staging_checksum.changed
