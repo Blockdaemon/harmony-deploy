@@ -20,6 +20,10 @@ ansible-playbook harmony.yml
 ansible-playbook harmony.yml
 ```
 
+**NOTE: If `BN_MA` changes in `node.sh`, update tasks/wrapper.yml**
+
+All other changes in `node.sh` (e.g. arguments etc) need to be updated in files/sbin/harmonyd
+
 ## Start/restart Harmony
 
 ```
