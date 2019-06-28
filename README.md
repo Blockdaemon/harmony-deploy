@@ -38,6 +38,13 @@ ansible-playbook clean.yml
 ansible-playbook stop.yml
 ```
 
+## Stop Harmony, clean, start harmony
+
+```
+./update
+ansible-playbook stop.yml clean.yml harmony.yml start.yml
+```
+
 ## Nuke Harmony database and user
 
 ```
