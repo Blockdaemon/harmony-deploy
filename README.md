@@ -13,10 +13,11 @@ chmod og-rx -R credentials
 ansible-playbook harmony.yml
 ```
 
-## Update binaries
+## Update binaries from upstream, push to hosts
 
 ```
 ./update.sh
+ansible-playbook harmony.yml
 ```
 
 ## Start/restart Harmony
@@ -25,7 +26,7 @@ ansible-playbook harmony.yml
 ansible-playbook restart.yml
 ```
 
-## Restart Harmony after cleaning db (like ./node.sh -c)
+## Stop/clean/start Harmony (like ./node.sh -c)
 
 ```
 ansible-playbook clean.yml
