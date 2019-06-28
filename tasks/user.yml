@@ -42,7 +42,7 @@
     copy:
       src: "{{ item }}"
       dest: "{{ harmony_home }}/{{ item | basename }}"
-      mode: '0644'
+      mode: '0600'
     with_fileglob:
       - credentials/{{ ansible_hostname }}/bls/UTC--*Z--bls_*
 
