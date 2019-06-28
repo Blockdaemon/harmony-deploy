@@ -45,7 +45,7 @@ ansible-playbook stop.yml
 ## Stop Harmony, clean, start harmony
 
 ```
-./update
+./update.sh
 ansible-playbook stop.yml clean.yml harmony.yml start.yml
 ```
 
