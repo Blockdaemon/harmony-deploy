@@ -11,14 +11,6 @@
       owner: root
       group: root
 
-  - name: Make harmonyd pidfile directory
-    file:
-      path: /run/harmonyd/
-      state: directory
-      mode: '0755'
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-
   - name: Install harmonyd daemon wrapper
     copy:
       src: files/sbin/harmonyd

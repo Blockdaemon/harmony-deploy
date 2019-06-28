@@ -5,6 +5,8 @@ After=network-online.target
 
 [Service]
 User={{ harmony_user }}
+ExecStartPre=/bin/mkdir -p /run/harmonyd
+ExecStartPre=/bin/chown -R {{ harmony_user }}:{{ harmony_user }} /run/harmonyd
 WorkingDirectory={{ harmony_home }}
 PermissionsStartOnly=true
 ExecStart=/usr/local/sbin/harmonyd
