@@ -8,7 +8,7 @@ done
 if dd if=wallet count=1 bs=300 | grep Error; then
    rm wallet
 fi
-echo asdf | ./node.sh -S -1 -k asdf <> /dev/null 2>&1
+echo asdf | ./node.sh -S -1 -k asdf > /dev/null 2>&1
 chmod +x wallet harmony
 if dd if=harmony count=1 bs=300 | grep Error; then
    rm harmony
