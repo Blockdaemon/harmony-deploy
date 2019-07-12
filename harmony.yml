@@ -4,18 +4,28 @@
   become: true
 
   handlers:
-  - name: systemd reload handler
+  - name: Reload systemd handler
     systemd:
       daemon_reload: yes
     listen: "systemd reload"
 
-  - name: Reload sysctl
+  - name: Restart systemd-journald handler
+    systemd:
+      name: systemd-journald
+      state: restarted
+    listen: "systemd-journald restart"
+
+  - name: Reload sysctl handler
     command: "/sbin/sysctl -p /etc/sysctl.d/99-harmony.conf"
     listen: "sysctl reload"
 
   tasks:
   - import_tasks: tasks/system.yml
+    tags: system
   - import_tasks: tasks/wrapper.yml
+    tags: wrapper
   - import_tasks: tasks/staging.yml
+    tags: staging
   - import_tasks: tasks/update.yml
+    tags: update
     when: staging_bins.changed or staging_libs.changed or staging_checksum.changed
