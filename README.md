@@ -24,6 +24,8 @@ ansible-playbook harmony.yml
 
 All other changes in `node.sh` (e.g. arguments etc) need to be updated in files/sbin/harmonyd
 
+On a new install this will NOT automatically start harmony! To do that:
+
 ## Start/restart Harmony
 
 ```
