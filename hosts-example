@@ -7,3 +7,4 @@ wallet_home=/home/user
 [all]
 harmony0.example.com
 harmony1.example.com
+harmony-exp.example.com is_explorer=true shard_id=0

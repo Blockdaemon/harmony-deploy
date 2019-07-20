@@ -19,7 +19,11 @@
   - name: Get BLS filenames
     find:
       paths: "{{ wallet_home }}"
-      patterns: "UTC--*Z--bls_*"
+      recurse: no
+      file_type: file
+      patterns:
+        - 'UTC--*Z--bls_*'
+        - '*.key'
     register: bls
 
   - name: Fetch BLS

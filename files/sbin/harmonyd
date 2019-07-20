@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# public boot node multiaddress
+BN_MA="/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv,/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9,/ip4/13.113.101.219/tcp/12019/p2p/QmQayinFSgMMw5cSpDUiD9pQ2WeP6WNmGxpZ6ou3mdVFJX,/ip4/99.81.170.167/tcp/12019/p2p/QmRVbTpEYup8dSaURZfF6ByrMTSKa4UyUzJhSjahFzRqNj"
+
 . /etc/default/harmonyd
 
 unset -v progname
@@ -72,15 +75,17 @@ NODE_PORT=9000
 PUB_IP=
 
 # poorly emulate upstream node.sh
-pattern="UTC--*Z--bls_*"
+pattern="UTC--*Z--bls_* *.key"
+shopt -s nullglob
 blsfiles=( $pattern )
+shopt -u nullglob
 BLSKEYFILE=${blsfiles[0]}
 echo "found ${BLSKEYFILE}" >&2
 
 myip
 
 while [ 1 ]; do
-  LD_LIBRARY_PATH=. ./harmony -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -is_genesis -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase
+  LD_LIBRARY_PATH=. ./harmony -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT $MODE -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase
   echo "ERROR harmony died, restarting in 30 seconds" >&2
   sleep 30
 done

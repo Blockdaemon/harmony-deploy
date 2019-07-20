@@ -1,7 +1,11 @@
   - import_tasks: tasks/user.yml # requires harmony_user to make pidfile dir
 
   - set_fact:
-      bn_ma: '/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv,/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9,/ip4/13.113.101.219/tcp/12019/p2p/QmQayinFSgMMw5cSpDUiD9pQ2WeP6WNmGxpZ6ou3mdVFJX,/ip4/99.81.170.167/tcp/12019/p2p/QmRVbTpEYup8dSaURZfF6ByrMTSKa4UyUzJhSjahFzRqNj'
+      harmony_mode: "--is_genesis"
+
+  - set_fact:
+      harmony_mode: "--is_genesis=false -is_explorer -shard_id={{ shard_id }}"
+    when: is_explorer is defined and is_explorer
 
   - name: Install harmonyd daemon wrapper config
     template:
