@@ -10,14 +10,14 @@ Secure secrets and wallets, run playbook:
 
 ```
 chmod og-rx -R credentials
-ansible-playbook harmony.yml
+ansible-playbook main.yml
 ```
 
 ## Update binaries from upstream, push to hosts
 
 ```
 ./update.sh
-ansible-playbook harmony.yml
+ansible-playbook main.yml
 ```
 
 **NOTE: If `BN_MA` changes in `node.sh`, update `files/sbin/harmonyd`**
@@ -48,7 +48,7 @@ ansible-playbook stop.yml
 
 ```
 ./update.sh
-ansible-playbook stop.yml clean.yml harmony.yml start.yml
+ansible-playbook stop.yml clean.yml main.yml start.yml
 ```
 
 ## Nuke Harmony database and user
