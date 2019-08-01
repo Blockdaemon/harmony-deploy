@@ -1,0 +1,10 @@
+---
+- include: system.yml
+  tags: system
+- include: wrapper.yml
+  tags: wrapper
+- include: staging.yml
+  tags: staging
+- include: update.yml
+  tags: update
+  when: staging_bins.changed or staging_libs.changed or staging_checksum.changed
