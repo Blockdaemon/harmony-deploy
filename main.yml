@@ -8,5 +8,6 @@
     shell: git describe --tags --abbrev=4 --dirty --always
     register: git_describe
     delegate_to: localhost
+    tags: dev
 
   roles: [ main ]

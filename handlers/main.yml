@@ -1,0 +1,15 @@
+---
+- name: Reload systemd handler
+  systemd:
+    daemon_reload: yes
+  listen: "systemd reload"
+
+- name: Restart systemd-journald handler
+  systemd:
+    name: systemd-journald
+    state: restarted
+  listen: "systemd-journald restart"
+
+- name: Reload sysctl handler
+  command: "/sbin/sysctl -p /etc/sysctl.d/99-harmony.conf"
+  listen: "sysctl reload"

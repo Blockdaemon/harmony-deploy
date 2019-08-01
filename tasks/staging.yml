@@ -1,34 +1,35 @@
-  - name: Install harmony bins to staging
-    copy:
-      src: "files/bin/{{ item }}"
-      dest: "{{ harmony_home }}/staging"
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-      mode: preserve
-    with_items:
-      - harmony
-      - wallet
-      - node.sh
-      - wallet.sh
-      - mystatus.sh
-    register: staging_bins
+---
+- name: Install harmony bins to staging
+  copy:
+    src: "files/bin/{{ item }}"
+    dest: "{{ harmony_home }}/staging"
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: preserve
+  with_items:
+    - harmony
+    - wallet
+    - node.sh
+    - wallet.sh
+    - mystatus.sh
+  register: staging_bins
 
-  - name: Install harmony libs to staging
-    copy:
-      src: "{{ item }}"
-      dest: "{{ harmony_home }}/staging"
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-      mode: preserve
-    with_fileglob:
-      - files/bin/lib*
-    register: staging_libs
+- name: Install harmony libs to staging
+  copy:
+    src: "{{ item }}"
+    dest: "{{ harmony_home }}/staging"
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: preserve
+  with_fileglob:
+    - files/bin/lib*
+  register: staging_libs
 
-  - name: Install harmony checksum file to staging
-    copy:
-      src: "files/bin/harmony-checksums.txt"
-      dest: "{{ harmony_home }}/staging"
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-      mode: preserve
-    register: staging_checksum
+- name: Install harmony checksum file to staging
+  copy:
+    src: "files/bin/harmony-checksums.txt"
+    dest: "{{ harmony_home }}/staging"
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: preserve
+  register: staging_checksum

@@ -85,7 +85,7 @@ echo "found ${BLSKEYFILE}" >&2
 myip
 
 while [ 1 ]; do
-  LD_LIBRARY_PATH=. ./harmony -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT $MODE -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase
+  LD_LIBRARY_PATH=. ./harmony${DEV} -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT $MODE -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase
   echo "ERROR harmony died, restarting in 30 seconds" >&2
   sleep 30
 done

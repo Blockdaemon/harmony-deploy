@@ -2,6 +2,7 @@
 /*.retry
 /files/bin/bootnode
 /files/bin/harmony
+/files/bin/harmony-dev
 /files/bin/harmony-update.out
 /files/bin/latest
 /files/bin/libbls384_256.so

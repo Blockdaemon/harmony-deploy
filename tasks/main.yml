@@ -2,9 +2,11 @@
 - include: system.yml
   tags: system
 - include: wrapper.yml
-  tags: wrapper
+  tags: [ wrapper, dev]
 - include: staging.yml
   tags: staging
+- include: dev.yml
+  tags: dev
 - include: update.yml
-  tags: update
+  tags: [update, staging, dev]
   when: staging_bins.changed or staging_libs.changed or staging_checksum.changed

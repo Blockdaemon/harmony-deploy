@@ -1,0 +1,14 @@
+---
+- name: Looking for {{ dev_bindir }}/harmony
+  local_action: stat path="{{ dev_bindir }}/harmony"
+  register: dev_bin
+
+- name: Install harmony dev bin to staging
+  copy:
+    src: "{{ dev_bindir }}/harmony"
+    dest: "{{ harmony_home }}/staging/harmony-dev"
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: preserve
+  register: staging_bins
+  when: dev_bin.stat.exists
