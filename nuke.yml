@@ -2,6 +2,8 @@
 - hosts: all
   gather_facts: true
   become: true
+  pre_tasks:
+  - include_vars: defaults/main.yml
 
   handlers:
   - name: systemd reload handler

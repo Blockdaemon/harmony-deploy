@@ -1,0 +1,15 @@
+harmony_user: harmony
+harmony_home: /home/harmony
+harmony_mode: "--is_genesis"
+harmony_dev: ""
+
+wallet_home: /home/user
+dev_bindir: "{{ lookup('env','HOME') }}/src/harmony-one/harmony/bin"
+dev_suffix: dev
+
+staging_bins:
+  changed: False
+staging_libs:
+  changed: False
+staging_checksum:
+  changed: False
