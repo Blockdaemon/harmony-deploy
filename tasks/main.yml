@@ -1,12 +1,22 @@
 ---
-- include: system.yml
+- import_tasks: system.yml
   tags: system
-- include: wrapper.yml
-  tags: [ wrapper, dev]
-- include: staging.yml
-  tags: staging
-- include: dev.yml
+
+- import_tasks: user.yml
+  tags: system
+
+- import_tasks: wrapper.yml
+  tags: [wrapper, dev]
+
+- import_tasks: staging.yml
+  tags: [staging, dev]
+
+- name: Looking for {{ dev_bindir }}/harmony
+  local_action: stat path="{{ dev_bindir }}/harmony"
+  register: dev_bin
   tags: dev
-- include: update.yml
-  tags: [update, staging, dev]
-  when: staging_bins.changed or staging_libs.changed or staging_checksum.changed
+
+- name: Install harmony dev bin
+  import_tasks: dev.yml
+  when: dev_bin.stat.exists
+  tags: dev

@@ -3,13 +3,23 @@
   systemd:
     daemon_reload: yes
   listen: "systemd reload"
+  tags: [system, wrapper]
 
 - name: Restart systemd-journald handler
   systemd:
     name: systemd-journald
     state: restarted
   listen: "systemd-journald restart"
+  tags: system
 
 - name: Reload sysctl handler
   command: "/sbin/sysctl -p /etc/sysctl.d/99-harmony.conf"
   listen: "sysctl reload"
+  tags: system
+
+- name: Restart harmony
+  systemd:
+    name: harmony
+    state: restarted
+  listen: "harmony restart"
+  tags: staging

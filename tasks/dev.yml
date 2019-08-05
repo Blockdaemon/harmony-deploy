@@ -1,8 +1,4 @@
 ---
-- name: Looking for {{ dev_bindir }}/harmony
-  local_action: stat path="{{ dev_bindir }}/harmony"
-  register: dev_bin
-
 - name: Install harmony dev bin to staging
   copy:
     src: "{{ dev_bindir }}/harmony"
@@ -10,5 +6,11 @@
     owner: "{{ harmony_user }}"
     group: "{{ harmony_user }}"
     mode: preserve
-  register: staging_bins
-  when: dev_bin.stat.exists
+  register: staging_devbin
+
+- name: Transfer dev harmony to live
+  import_tasks: update.yml
+  vars:
+    item: "{{ dev_bin.stat.path }}-dev"
+  when: staging_devbin.changed
+  tags: [never, dev]

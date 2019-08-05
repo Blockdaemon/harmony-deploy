@@ -1,26 +1,22 @@
-  - name: Get list of staging files
-    find:
-      paths: "{{ harmony_home }}/staging/"
-    register: staging_find
+- name: Set up facts for "{{ item }}"
+  set_fact:
+    sname: "{{ harmony_home }}/staging/{{ item | basename }}"
+    dname: "{{ harmony_home }}/{{ item | basename }}"
 
-  # Stop harmony so we can update the binaries
-  - name: Stop harmony
-    systemd:
-      name: harmony
-      state: stopped
-    register: harmony_stopped
+- name: Make room for "{{ item }}" backup
+  file:
+    path: "{{ dname }}.bak"
+    state: absent
 
-  - name: Update harmony files from staging
-    copy:
-      src: "{{ item.path}}"
-      dest: "{{ harmony_home }}/"
-      remote_src: true
-      mode: preserve
-    with_items: "{{ staging_find.files }}"
+- name: Move existing "{{ item }}" to backup
+  command: mv "{{ dname }}" "{{ dname }}.bak"
+  args:
+    creates: "{{ dname }}.bak"
 
-  # Only start harmony if we stopped it above
-  - name: Start harmony
-    systemd:
-      name: harmony
-      state: restarted
-    when: harmony_stopped.changed
+- name: Update harmony "{{ item }}" from staging
+  copy:
+    src: "{{ sname }}"
+    dest: "{{ dname }}"
+    remote_src: true
+    mode: preserve
+  notify: harmony restart

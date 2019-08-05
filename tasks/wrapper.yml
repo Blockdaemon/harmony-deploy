@@ -1,41 +1,53 @@
-  - import_tasks: tasks/user.yml # requires harmony_user to make pidfile dir
+---
+- set_fact:
+    harmony_mode: "--is_genesis=false -is_explorer -shard_id={{ shard_id }}"
+  when: is_explorer is defined and is_explorer
 
-  - set_fact:
-      harmony_mode: "--is_genesis=false -is_explorer -shard_id={{ shard_id }}"
-    when: is_explorer is defined and is_explorer
+- set_fact:
+    harmony_dev: "-{{ dev_suffix }}"
+  tags: [never, dev]
 
-  - set_fact:
-      harmony_dev: "-{{ dev_suffix }}"
-    tags: [never, dev]
+- name: Install harmonyd daemon wrapper config
+  template:
+    src: templates/harmonyd.j2
+    dest: /etc/default/harmonyd
+    mode: '0644'
+    owner: root
+    group: root
+  notify: "harmony restart"
 
-  - name: Install harmonyd daemon wrapper config
-    template:
-      src: templates/harmonyd.j2
-      dest: /etc/default/harmonyd
-      mode: '0644'
-      owner: root
-      group: root
+- name: Install harmonyd daemon wrapper
+  copy:
+    src: files/sbin/harmonyd
+    dest: /usr/local/sbin/
+    mode: '0755'
+    owner: root
+    group: root
+  notify: "harmony restart"
 
-  - name: Install harmonyd daemon wrapper
-    copy:
-      src: files/sbin/harmonyd
-      dest: /usr/local/sbin/
-      mode: '0755'
-      owner: root
-      group: root
-    notify: "systemd reload"
+- name: Install harmonyd systemd unit file
+  template:
+    src: templates/harmony.service.j2
+    dest: /etc/systemd/system/harmony.service
+    mode: '0644'
+    owner: root
+    group: root
+  notify: "systemd reload"
 
-  - name: Install harmonyd systemd unit file
-    template:
-      src: templates/harmony.service.j2
-      dest: /etc/systemd/system/harmony.service
-      mode: '0644'
-      owner: root
-      group: root
-    notify: "systemd reload"
+- name: Enable harmony unit file
+  systemd:
+    name: "{{ harmony_user }}"
+    enabled: yes
+    masked: no
 
-  - name: Enable harmony unit file
-    systemd:
-      name: "{{ harmony_user }}"
-      enabled: yes
-      masked: no
+- name: Install upstream harmony wrappers
+  copy:
+    src: "files/bin/{{ item }}"
+    dest: "{{ harmony_home }}/"
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: preserve
+  with_items:
+    - node.sh
+    - wallet.sh
+    - mystatus.sh
