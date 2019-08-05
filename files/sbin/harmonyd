@@ -9,9 +9,14 @@ unset -v progname
 progname="${0##*/}"
 pid=$$
 pidfile=/run/$progname/$progname.pid
-# output to stderr as well
-#exec 1> >(logger --id=$pid -s -t $progname) 2>&1
+# output to file
+#exec 1>> /var/log/$progname/$progname.log 2>&1
+# output to multilog (requires daemontools)
+#exec 1> >(multilog t s10485760 n10 '!tai64nlocal' /var/log/$progname) 2>&1
+# output to syslog only
 exec 1> >(logger --id=$pid -t $progname) 2>&1
+# output to syslog and stderr
+#exec 1> >(logger --id=$pid -s -t $progname) 2>&1
 
 if [ ! -d /run/$progname -o ! -w /run/$progname ]; then
    echo "ERROR /run/$progname not a writable directory" >&2
@@ -85,7 +90,7 @@ echo "found ${BLSKEYFILE}" >&2
 myip
 
 while [ 1 ]; do
-  LD_LIBRARY_PATH=. ./harmony${DEV} -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT $MODE -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase
+  LD_LIBRARY_PATH=. ./harmony${DEV} -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT $MODE -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase > /dev/null # keep stderr
   echo "ERROR harmony died, restarting in 30 seconds" >&2
   sleep 30
 done

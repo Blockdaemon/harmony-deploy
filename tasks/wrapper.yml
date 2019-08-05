@@ -7,9 +7,17 @@
     harmony_dev: "-{{ dev_suffix }}"
   tags: [never, dev]
 
+#- name: Make harmony logfile directory
+#  file:
+#    path: "/var/log/harmonyd"
+#    state: directory
+#    owner: "{{ harmony_user }}"
+#    group: "{{ harmony_user }}"
+#    mode: '0755'
+
 - name: Install harmonyd daemon wrapper config
   template:
-    src: templates/harmonyd.j2
+    src: templates/harmonyd-default.j2
     dest: /etc/default/harmonyd
     mode: '0644'
     owner: root
