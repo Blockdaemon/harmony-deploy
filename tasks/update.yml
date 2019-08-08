@@ -12,6 +12,7 @@
   command: mv "{{ dname }}" "{{ dname }}.bak"
   args:
     creates: "{{ dname }}.bak"
+  ignore_errors: yes
 
 - name: Update harmony "{{ item }}" from staging
   copy:

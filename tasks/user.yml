@@ -49,6 +49,7 @@
       mode: '0600'
     with_fileglob:
       - credentials/{{ ansible_hostname }}/bls/UTC--*Z--bls_*
+      - credentials/{{ ansible_hostname }}/bls/*.key
 
 # - set_fact:
 #     passphrase_file: "credentials/{{ ansible_hostname }}/passphrase"

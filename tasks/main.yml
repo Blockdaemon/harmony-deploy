@@ -3,7 +3,7 @@
   tags: system
 
 - import_tasks: user.yml
-  tags: system
+  tags: [system, user]
 
 - import_tasks: wrapper.yml
   tags: [wrapper, dev]

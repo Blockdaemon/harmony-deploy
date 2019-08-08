@@ -46,6 +46,7 @@
     with_items:
       - "/usr/local/sbin/harmonyd"
       - "/etc/default/harmonyd"
+      - "/etc/logrotate.d/harmonyd"
       - "/etc/sysctl.d/99-harmony.conf"
 
   # TODO: revert systemd NPROC and NOFILES
@@ -55,6 +56,11 @@
       name: "{{ harmony_user }}"
       state: absent
     ignore_errors: yes
+
+  - name: Remove log log dir
+    shell: "rm -rf /var/log/harmonyd"
+    args:
+      warn: no
 
   - name: Remove home dir
     shell: "rm -rf {{ harmony_home }}"

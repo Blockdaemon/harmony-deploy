@@ -7,13 +7,21 @@
     harmony_dev: "-{{ dev_suffix }}"
   tags: [never, dev]
 
-#- name: Make harmony logfile directory
-#  file:
-#    path: "/var/log/harmonyd"
-#    state: directory
-#    owner: "{{ harmony_user }}"
-#    group: "{{ harmony_user }}"
-#    mode: '0755'
+- name: Make harmony logfile directory
+  file:
+    path: "/var/log/harmonyd"
+    state: directory
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: '0755'
+
+- name: Install harmonyd logrotate config
+  template:
+    src: templates/harmonyd-logrotate.j2
+    dest: /etc/logrotate.d/harmonyd
+    mode: '0644'
+    owner: root
+    group: root
 
 - name: Install harmonyd daemon wrapper config
   template:
