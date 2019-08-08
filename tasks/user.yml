@@ -22,23 +22,23 @@
       group: "{{ harmony_user }}"
       mode: '0755'
 
-  - name: Make harmony user keystore
-    file:
-      path: "{{ harmony_home }}/.hmy/keystore/"
-      state: directory
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-      mode: '0755'
+# - name: Make harmony user keystore
+#   file:
+#     path: "{{ harmony_home }}/.hmy/keystore/"
+#     state: directory
+#     owner: "{{ harmony_user }}"
+#     group: "{{ harmony_user }}"
+#     mode: '0755'
 
-  - name: Send keystore file(s)
-    copy:
-      src: "{{ item }}"
-      dest: "{{ harmony_home }}/.hmy/keystore/"
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-      mode: '0600'
-    with_fileglob:
-      - credentials/{{ ansible_hostname }}/keystore/*
+# - name: Send keystore file(s)
+#   copy:
+#     src: "{{ item }}"
+#     dest: "{{ harmony_home }}/.hmy/keystore/"
+#     owner: "{{ harmony_user }}"
+#     group: "{{ harmony_user }}"
+#     mode: '0600'
+#   with_fileglob:
+#     - credentials/{{ ansible_hostname }}/keystore/*
 
   - name: Send BLS
     copy:
@@ -52,12 +52,12 @@
       - credentials/{{ ansible_hostname }}/bls/*.key
 
 # - set_fact:
-#     passphrase_file: "credentials/{{ ansible_hostname }}/passphrase"
+#     passphrase_file: "credentials/{{ ansible_hostname }}/bls/passphrase"
 
-  - name: Send passphrase
+  - name: Send BLS passphrase
     copy:
       #content: "{{ lookup('file',passphrase_file) | trim }}"
-      src: "credentials/{{ ansible_hostname }}/passphrase"
+      src: "credentials/{{ ansible_hostname }}/bls/passphrase"
       dest: "{{ harmony_home }}/.passphrase"
       owner: "{{ harmony_user }}"
       group: "{{ harmony_user }}"

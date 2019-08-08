@@ -2,11 +2,11 @@
 
 Copy `hosts-example` to `hosts` and configure the remote hosts
 
-Copy passphrase into `credentials/<hostname>/passphrase`
+Install bls key to `credentials/<hostname>/bls`
 
-Install wallet and bls keys to `credentials/<hostname>/` into `keystore/` and `bls/` respectively
+Copy bls passphrase into `credentials/<hostname>/bls/passphrase`
 
-Secure secrets and wallets, run playbook:
+Secure credentials
 
 ```
 chmod og-rx -R credentials
