@@ -1,11 +1,8 @@
 ---
-- set_fact:
+- name: "***** EXPLORER *****"
+  set_fact:
     harmony_mode: "--is_genesis=false -is_explorer -shard_id={{ shard_id }}"
   when: is_explorer is defined and is_explorer
-
-- set_fact:
-    harmony_dev: "-{{ dev_suffix }}"
-  tags: [never, dev]
 
 - name: Make harmony logfile directory
   file:
@@ -55,15 +52,3 @@
     name: "{{ harmony_user }}"
     enabled: yes
     masked: no
-
-- name: Install upstream harmony wrappers
-  copy:
-    src: "files/bin/{{ item }}"
-    dest: "{{ harmony_home }}/"
-    owner: "{{ harmony_user }}"
-    group: "{{ harmony_user }}"
-    mode: preserve
-  with_items:
-    - node.sh
-    - wallet.sh
-    - mystatus.sh

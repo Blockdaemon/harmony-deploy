@@ -1,15 +1,10 @@
 - name: Set up facts for "{{ item }}"
   set_fact:
-    sname: "{{ harmony_home }}/staging/{{ item | basename }}"
-    dname: "{{ harmony_home }}/{{ item | basename }}"
-
-- name: Make room for "{{ item }}" backup
-  file:
-    path: "{{ dname }}.bak"
-    state: absent
+    sname: "{{ harmony_home }}/staging/{{ item }}"
+    dname: "{{ harmony_home }}/{{ item }}"
 
 - name: Move existing "{{ item }}" to backup
-  command: mv "{{ dname }}" "{{ dname }}.bak"
+  command: mv -f "{{ dname }}" "{{ dname }}.bak"
   args:
     creates: "{{ dname }}.bak"
   ignore_errors: yes

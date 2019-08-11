@@ -8,9 +8,9 @@
     mode: preserve
   register: staging_devbin
 
-- name: Transfer dev harmony to live
+- name: Transfer harmony dev bin to live
   import_tasks: update.yml
   vars:
-    item: "{{ dev_bin.stat.path }}-dev"
+    item: "harmony-dev"
   when: staging_devbin.changed
   tags: [never, dev]

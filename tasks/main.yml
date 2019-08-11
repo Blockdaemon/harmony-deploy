@@ -5,16 +5,22 @@
 - import_tasks: user.yml
   tags: [system, user]
 
-- import_tasks: wrapper.yml
-  tags: [wrapper, dev]
-
-- import_tasks: staging.yml
-  tags: [staging, dev]
-
 - name: Looking for {{ dev_bindir }}/harmony
   local_action: stat path="{{ dev_bindir }}/harmony"
   register: dev_bin
   tags: dev
+
+- name: "***** DEV VERSION *****"
+  set_fact:
+    harmony_dev: "-{{ dev_suffix }}"
+  tags: [never, dev]
+  when: dev_bin.stat.exists
+
+- import_tasks: daemon.yml
+  tags: [daemon, dev]
+
+- import_tasks: install.yml
+  tags: [install, dev]
 
 - name: Install harmony dev bin
   import_tasks: dev.yml
