@@ -9,14 +9,10 @@ unset -v progname
 progname="${0##*/}"
 pid=$$
 pidfile=/run/$progname/$progname.pid
-# output to file
-#exec 1>> /var/log/$progname/$progname.log 2>&1
-# output to multilog (requires daemontools)
-#exec 1> >(multilog t s10485760 n10 '!tai64nlocal' /var/log/$progname) 2>&1
-# output to syslog only
-exec 1> >(logger --id=$pid -t $progname) 2>&1
-# output to syslog and stderr
-#exec 1> >(logger --id=$pid -s -t $progname) 2>&1
+# output stdout to file
+exec 1>> /var/log/$progname/harmony.log
+# output stderr to syslog
+exec 2> >(logger --id=$pid -t $progname)
 
 if [ ! -d /run/$progname -o ! -w /run/$progname ]; then
    echo "ERROR /run/$progname not a writable directory" >&2
@@ -33,7 +29,7 @@ unset -f msg err
 msg() {
    case $# in
    [1-9]*)
-      echo "${progname}: $*" >&2
+      echo "$*" >&2
       ;;
    esac
 }
@@ -42,7 +38,7 @@ err() {
    local code
    code="${1}"
    shift 1
-   msg "$@"
+   msg "ERROR: $@"
    exit "${code}"
 }
 
@@ -69,7 +65,7 @@ function myip() {
 # get ipv4 address only, right now only support ipv4 addresses
    PUB_IP=$(dig -4 @resolver1.opendns.com ANY myip.opendns.com +short)
    if valid_ip $PUB_IP; then
-      msg "public IP address autodetected: $PUB_IP"
+      msg "INFO: public IP address autodetected: $PUB_IP"
    else
       err 1 "NO valid public IP found: $PUB_IP"
    fi
@@ -85,12 +81,12 @@ shopt -s nullglob
 blsfiles=( $pattern )
 shopt -u nullglob
 BLSKEYFILE=${blsfiles[0]}
-echo "found ${BLSKEYFILE}" >&2
+msg "INFO: found ${BLSKEYFILE}"
 
 myip
 
 while [ 1 ]; do
-  LD_LIBRARY_PATH=. ./harmony${DEV} -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT $MODE -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase >> /var/log/harmonyd/harmony.log # stderr goes to exec logger
-  echo "ERROR harmony died, restarting in 30 seconds" >&2
+  LD_LIBRARY_PATH=. ./harmony${DEV} -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT $MODE -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase
+  msg "ERROR: harmony died, restarting in 30 seconds"
   sleep 30
 done
