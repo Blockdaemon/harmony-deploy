@@ -9,7 +9,8 @@ dev_suffix: dev
 
 staging_bins:
   changed: False
-staging_libs:
-  changed: False
 staging_checksum:
   changed: False
+
+is_explorer: false
+is_dev: false

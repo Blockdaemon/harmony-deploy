@@ -1,4 +1,8 @@
 ---
+- name: "***** DEV VERSION *****"
+  set_fact:
+    harmony_dev: "-{{ dev_suffix }}"
+
 - name: Install harmony dev bin to staging
   copy:
     src: "{{ dev_bindir }}/harmony"
@@ -13,4 +17,3 @@
   vars:
     item: "harmony-dev"
   when: staging_devbin.changed
-  tags: [never, dev]

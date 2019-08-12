@@ -2,7 +2,7 @@
 - name: "***** EXPLORER *****"
   set_fact:
     harmony_mode: "--is_genesis=false -is_explorer -shard_id={{ shard_id }}"
-  when: is_explorer is defined and is_explorer
+  when: is_explorer
 
 - name: Make harmony logfile directory
   file:

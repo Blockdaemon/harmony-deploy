@@ -10,19 +10,19 @@
   register: dev_bin
   tags: dev
 
-- name: "***** DEV VERSION *****"
+- name: "***** DEV VERSION (by tag) *****"
   set_fact:
-    harmony_dev: "-{{ dev_suffix }}"
+    is_dev: true
   tags: [never, dev]
-  when: dev_bin.stat.exists
+
+# has to be done before daemon.yml, sets up harmony_dev var
+- name: Install harmony dev bin
+  import_tasks: dev.yml
+  when: dev_bin.stat.exists and is_dev
+  tags: dev
 
 - import_tasks: daemon.yml
   tags: [daemon, dev]
 
 - import_tasks: install.yml
   tags: [install, dev]
-
-- name: Install harmony dev bin
-  import_tasks: dev.yml
-  when: dev_bin.stat.exists
-  tags: dev
