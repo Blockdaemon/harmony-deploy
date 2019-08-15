@@ -1,4 +1,4 @@
-# Harmony scripts
+# Harmony ansible deployment
 
 Copy `hosts-example` to `hosts` and configure the remote hosts
 
