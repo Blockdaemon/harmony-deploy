@@ -49,6 +49,6 @@
 
 - name: Enable harmony unit file
   systemd:
-    name: "{{ harmony_user }}"
+    name: "harmony"
     enabled: yes
     masked: no
