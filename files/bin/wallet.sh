@@ -25,8 +25,6 @@ Usage: $0 [option] command
 
 Options:
    -d          download all the binaries/config files (do it when updated)
-   -p profile  use the profile for the given network (default [main], beta, pangaea)
-   -t          equivalent to -p pangaea (deprecated)
    -h          print this help
 
 Commands:
@@ -79,20 +77,11 @@ do_download () {
     chmod +x wallet
 }
 
-unset network
-network=default
-
-while getopts "dp:th" opt; do
+while getopts "dh" opt; do
     case ${opt} in
         d)
             do_download
             exit 0
-            ;;
-        p)
-            network="${OPTARG}"
-            ;;
-        t)
-            network=pangaea
             ;;
         h|*)
             usage
@@ -105,7 +94,7 @@ shift $((OPTIND-1))
 
 # Run Harmony Wallet
 if [ "$OS" = "Linux" ]; then
-    LD_LIBRARY_PATH=$(pwd) ./wallet -p "$network" "$@"
+    LD_LIBRARY_PATH=$(pwd) ./wallet "$@"
 else
-    DYLD_FALLBACK_LIBRARY_PATH=$(pwd) ./wallet -p "$network" "$@"
+    DYLD_FALLBACK_LIBRARY_PATH=$(pwd) ./wallet "$@"
 fi
