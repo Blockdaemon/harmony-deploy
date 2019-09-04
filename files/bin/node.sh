@@ -102,6 +102,9 @@ usage: ${progname} [-1ch] [-k KEYFILE]
    -S             run the ${progname} as non-root user (default: run as root)
    -p passfile    use the given BLS passphrase file
    -D             do not download Harmony binaries (default: download when start)
+   -m             collect and upload node metrics to harmony prometheus + grafana
+   -N network     join the given network (main, beta, pangaea; default: main)
+   -t             equivalent to -N pangaea (deprecated)
 
 example:
 
@@ -116,16 +119,18 @@ usage() {
    exit 64  # EX_USAGE
 }
 
-unset start_clean loop run_as_root blspass do_not_download
+unset start_clean loop run_as_root blspass do_not_download metrics network
 start_clean=false
 loop=true
 run_as_root=true
 do_not_download=false
+metrics=false
+network=main
 ${BLSKEYFILE=}
 
 unset OPTIND OPTARG opt
 OPTIND=1
-while getopts :1chk:sSp:D opt
+while getopts :1chk:sSp:DmN:t opt
 do
    case "${opt}" in
    '?') usage "unrecognized option -${OPTARG}";;
@@ -138,10 +143,51 @@ do
    S) run_as_root=false ;;
    p) blspass="${OPTARG}";;
    D) do_not_download=true;;
+   m) metrics=true;;
+   N) network="${OPTARG}";;
+   t) network=pangaea;;
    *) err 70 "unhandled option -${OPTARG}";;  # EX_SOFTWARE
    esac
 done
 shift $((${OPTIND} - 1))
+
+unset -v bootnodes REL network_type dns_zone
+
+case "${network}" in
+main)
+  bootnodes=(
+    /ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
+    /ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9
+    /ip4/13.113.101.219/tcp/12019/p2p/QmQayinFSgMMw5cSpDUiD9pQ2WeP6WNmGxpZ6ou3mdVFJX
+    /ip4/99.81.170.167/tcp/12019/p2p/QmRVbTpEYup8dSaURZfF6ByrMTSKa4UyUzJhSjahFzRqNj
+  )
+  REL=mainnet
+  network_type=mainnet
+  dns_zone=t.hmny.io
+  ;;
+beta)
+  bootnodes=(
+    /ip4/54.213.43.194/tcp/9868/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9
+    /ip4/100.26.90.187/tcp/9868/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
+    /ip4/13.113.101.219/tcp/12018/p2p/QmQayinFSgMMw5cSpDUiD9pQ2WeP6WNmGxpZ6ou3mdVFJX
+  )
+  REL=testnet
+  network_type=testnet
+  dns_zone=
+  ;;
+pangaea)
+  bootnodes=(
+    /ip4/54.86.126.90/tcp/9867/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
+    /ip4/52.40.84.2/tcp/9867/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9
+  )
+  REL=master
+  network_type=pangaea
+  dns_zone=pga.hmny.io
+  ;;
+*)
+  err 64 "${network}: invalid network"
+  ;;
+esac
 
 case $# in
 [1-9]*)
@@ -185,21 +231,66 @@ esac
 
 BUCKET=pub.harmony.one
 OS=$(uname -s)
-REL=r3
 
 if [ "$OS" == "Darwin" ]; then
    FOLDER=release/darwin-x86_64/$REL/
-   BIN=( harmony libbls384_256.dylib libcrypto.1.0.0.dylib libgmp.10.dylib libgmpxx.4.dylib libmcl.dylib )
+   BIN=( harmony libbls384_256.dylib libcrypto.1.0.0.dylib libgmp.10.dylib libgmpxx.4.dylib libmcl.dylib md5sum.txt )
 fi
 if [ "$OS" == "Linux" ]; then
    FOLDER=release/linux-x86_64/$REL/
-   BIN=( harmony libbls384_256.so libcrypto.so.10 libgmp.so.10 libgmpxx.so.4 libmcl.so )
+   BIN=( harmony libbls384_256.so libcrypto.so.10 libgmp.so.10 libgmpxx.so.4 libmcl.so md5sum.txt )
 fi
 
-# clean up old files
-for bin in "${BIN[@]}"; do
-   ${do_not_download} || rm -f ${bin}
-done
+any_new_binaries() {
+   local outdir
+   ${do_not_download} && return 0
+   outdir="${1:-.}"
+   mkdir -p "${outdir}"
+   curl -sSf http://${BUCKET}.s3.amazonaws.com/${FOLDER}md5sum.txt -o "${outdir}/md5sum.txt.new" || return $?
+   if diff $outdir/md5sum.txt.new md5sum.txt
+   then
+      rm "${outdir}/md5sum.txt.new"
+   else
+      mv "${outdir}/md5sum.txt.new" "${outdir}/md5sum.txt"
+      return 1
+   fi
+}
+
+extract_checksum() {
+   awk -v basename="${1}" '
+      {
+         s = $0;
+      }
+      # strip hash and following space; skip line if unsuccessful
+      sub(/^[0-9a-f]+ /, "", s) == 0 { next; }
+      # save hash
+      { hash = substr($0, 1, length($0) - length(s) - 1); }
+      # strip executable indicator (space or asterisk); skip line if unsuccessful
+      sub(/^[* ]/, "", s) == 0 { next; }
+      # leave basename only
+      { sub(/^.*\//, "", s); }
+      # if basename matches, print the hash and basename
+      s == basename { printf "%s  %s\n", hash, basename; }
+   '
+}
+
+verify_checksum() {
+   local dir file checksum_file checksum_for_file
+   dir="${1}"
+   file="${2}"
+   checksum_file="${3}"
+   [ -f "${dir}/${checksum_file}" ] || return 0
+   checksum_for_file="${dir}/${checksum_file}::${file}"
+   extract_checksum "${file}" < "${dir}/${checksum_file}" > "${dir}/${checksum_for_file}"
+   [ -s "${dir}/${checksum_for_file}" ] || return 0
+   if ! (cd "${dir}" && exec md5sum -c --status "${checksum_for_file}")
+   then
+      msg "checksum FAILED for ${file}"
+      return 1
+   fi
+   return 0
+}
+
 
 download_binaries() {
    local outdir
@@ -207,16 +298,26 @@ download_binaries() {
    outdir="${1:-.}"
    mkdir -p "${outdir}"
    for bin in "${BIN[@]}"; do
-      curl http://${BUCKET}.s3.amazonaws.com/${FOLDER}${bin} -o "${outdir}/${bin}" || return $?
+      curl -sSf http://${BUCKET}.s3.amazonaws.com/${FOLDER}${bin} -o "${outdir}/${bin}" || return $?
+      verify_checksum "${outdir}" "${bin}" md5sum.txt || return $?
+      msg "downloaded ${bin}"
    done
    chmod +x "${outdir}/harmony"
    (cd "${outdir}" && exec openssl sha256 "${BIN[@]}") > "${outdir}/harmony-checksums.txt"
 }
 
-download_binaries || err 69 "initial node software update failed"
+if any_new_binaries
+then
+   msg "binaries did not change"
+else
+   download_binaries || err 69 "initial node software update failed"
+fi
 
 NODE_PORT=9000
 PUB_IP=
+METRICS=
+PUSHGATEWAY_IP=
+PUSHGATEWAY_PORT=
 
 if [ "$OS" == "Linux" ]; then
    if ${run_as_root}; then
@@ -229,8 +330,11 @@ fi
 # find my public ip address
 myip
 
-# public boot node multiaddress
-BN_MA=/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv,/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9,/ip4/13.113.101.219/tcp/12019/p2p/QmQayinFSgMMw5cSpDUiD9pQ2WeP6WNmGxpZ6ou3mdVFJX,/ip4/99.81.170.167/tcp/12019/p2p/QmRVbTpEYup8dSaURZfF6ByrMTSKa4UyUzJhSjahFzRqNj
+unset -v BN_MA bn
+for bn in "${bootnodes[@]}"
+do
+  BN_MA="${BN_MA+"${BN_MA},"}${bn}"
+done
 
 if ${start_clean}
 then
@@ -329,6 +433,11 @@ kill_node() {
    do
       msg "re-downloading binaries in 5m"
       sleep 300
+      if any_new_binaries staging
+      then
+         msg "binaries did not change"
+         continue
+      fi
       while ! download_binaries staging
       do
          msg "staging download failed; retrying in 30s"
@@ -358,20 +467,35 @@ fi
 while :
 do
    msg "############### Running Harmony Process ###############"
-   if [ "$OS" == "Linux" ]; then
-   # Run Harmony Node
-      if [ -z "${blspass}" ]; then
-         echo -n "${passphrase}" | LD_LIBRARY_PATH=$(pwd) ./harmony -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -is_genesis -blskey_file "${BLSKEYFILE}" -blspass stdin
-      else
-         LD_LIBRARY_PATH=$(pwd) ./harmony -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -is_genesis -blskey_file "${BLSKEYFILE}" -blspass file:${blspass}
-      fi
-   else
-      if [ -z "${blspass}" ]; then
-         echo -n "${passphrase}" | DYLD_FALLBACK_LIBRARY_PATH=$(pwd) ./harmony -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -is_genesis -blskey_file "${BLSKEYFILE}" -blspass stdin
-      else
-         DYLD_FALLBACK_LIBRARY_PATH=$(pwd) ./harmony -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -is_genesis -blskey_file "${BLSKEYFILE}" -blspass file:${blspass}
-      fi
-   fi || msg "node process finished with status $?"
+   args=(
+      -bootnodes "${BN_MA}"
+      -ip "${PUB_IP}"
+      -port "${NODE_PORT}"
+      -is_genesis
+      -blskey_file "${BLSKEYFILE}"
+      -network_type="${network_type}"
+      -dns_zone="${dns_zone}"
+   )
+   case "${metrics}" in
+   true)
+      args+=(
+         -metrics "${metrics}"
+         -pushgateway_ip "${PUSHGATEWAY_IP}"
+         -pushgateway_port "${PUSHGATEWAY_PORT}"
+      )
+      ;;
+   esac
+   case "$OS" in
+   Darwin) ld_path_var=DYLD_FALLBACK_LIBRARY_PATH;;
+   *) ld_path_var=LD_LIBRARY_PATH;;
+   esac
+   run() {
+      env "${ld_path_var}=$(pwd)" ./harmony "${args[@]}" "${@}"
+   }
+   case "${blspass:+set}" in
+   "") echo -n "${passphrase}" | run -blspass stdin;;
+   *) run -blspass file:${blspass};;
+   esac || msg "node process finished with status $?"
    ${loop} || break
    msg "restarting in 10s..."
    sleep 10

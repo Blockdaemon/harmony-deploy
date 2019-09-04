@@ -1,22 +1,19 @@
 #!/bin/bash
 
-#bootnodes=(
-#/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
-#/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9
-#/ip4/13.113.101.219/tcp/12019/p2p/QmQayinFSgMMw5cSpDUiD9pQ2WeP6WNmGxpZ6ou3mdVFJX
-#/ip4/99.81.170.167/tcp/12019/p2p/QmRVbTpEYup8dSaURZfF6ByrMTSKa4UyUzJhSjahFzRqNj
-#)
-#network_type=mainnet
-#dns_zone=t.hmny.io
+bootnodes=(
+  /ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
+  /ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9
+  /ip4/13.113.101.219/tcp/12019/p2p/QmQayinFSgMMw5cSpDUiD9pQ2WeP6WNmGxpZ6ou3mdVFJX
+  /ip4/99.81.170.167/tcp/12019/p2p/QmRVbTpEYup8dSaURZfF6ByrMTSKa4UyUzJhSjahFzRqNj
+)
+network_type=mainnet
+dns_zone=t.hmny.io
 
-#unset -v BN_MA bn
-#for bn in "${bootnodes[@]}"
-#do
-#  BN_MA="${BN_MA+"${BN_MA},"}${bn}"
-#done
-
-# public boot node multiaddress
-BN_MA=/ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv,/ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9,/ip4/13.113.101.219/tcp/12019/p2p/QmQayinFSgMMw5cSpDUiD9pQ2WeP6WNmGxpZ6ou3mdVFJX,/ip4/99.81.170.167/tcp/12019/p2p/QmRVbTpEYup8dSaURZfF6ByrMTSKa4UyUzJhSjahFzRqNj
+unset -v BN_MA bn
+for bn in "${bootnodes[@]}"
+do
+  BN_MA="${BN_MA+"${BN_MA},"}${bn}"
+done
 
 . /etc/default/harmonyd
 
@@ -101,7 +98,7 @@ msg "INFO: found ${BLSKEYFILE}"
 myip
 
 while [ 1 ]; do
-  LD_LIBRARY_PATH=. ./harmony${DEV} -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT $MODE -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase # -network_type="${network_type}" -dns_zone="${dns_zone}"
+  LD_LIBRARY_PATH=. ./harmony${DEV} -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT $MODE -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase -network_type="${network_type}" -dns_zone="${dns_zone}"
   msg "ERROR: harmony died, restarting in 30 seconds"
   sleep 30
 done
