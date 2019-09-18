@@ -1,5 +1,5 @@
-9d1b286ba066dcba56bbde676f8ad3c2  bin/bootnode
-94446a037a4561aca1c50ebc1bbf417e  bin/harmony
-00eea5ac28bdefce209051a24035fb96  bin/txgen
-3c717af7f0cfe501ef099cae4cc51352  bin/wallet
-fd891fa5f0f4c260bb2fc424f7534024  bin/wallet_stress_test
+bd8fa145f8c4e39866b46da072b3469b  bin/bootnode
+f7b31de1a79bf749eece27cb8eaa99e1  bin/harmony
+0c50f59114b1f2214c4c4b669625358c  bin/txgen
+d41cbc57d2e6592bb35a8b308c4cca3b  bin/wallet
+fbe37bd943588409a32253c2687f876f  bin/wallet_stress_test

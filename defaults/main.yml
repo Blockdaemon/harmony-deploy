@@ -1,6 +1,6 @@
 harmony_user: harmony
 harmony_home: /home/harmony
-harmony_mode: "--is_genesis"
+harmony_mode: ""
 harmony_dev: ""
 
 wallet_home: /home/user
