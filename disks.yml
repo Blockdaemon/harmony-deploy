@@ -1,0 +1,34 @@
+---
+- hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+  - name: Install parted
+    apt:
+      name: parted
+      update_cache: yes
+
+  - name: Partition sdb
+    parted:
+      device: /dev/sdb
+      number: 1
+      state: present
+
+  - name: Make filesystem
+    filesystem:
+      fstype: ext4
+      dev: /dev/sdb1
+      opts: -L data
+
+  - name: Make /data dir
+    file:
+      path: '/data'
+      state: directory
+      mode: '0755'
+
+  - name: Mount /dev/sdb1 on /data
+    mount:
+      path: /data
+      src: LABEL=data
+      fstype: ext4
+      state: mounted
