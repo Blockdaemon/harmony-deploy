@@ -7,3 +7,13 @@
        notifempty
        missingok
 }
+
+{{ harmony_home }}/latest/validator-*.log {
+       copytruncate
+       daily
+       rotate 7
+       delaycompress
+       compress
+       notifempty
+       missingok
+}
