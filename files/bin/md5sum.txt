@@ -1,6 +1,4 @@
-047a0c73bff8eacbbe8054b802760f48  bin/bootnode
-52225e8f006be89e3be1cd27a75e9690  bin/harmony
-80063fafa12cf7ff951dbf956111ccc1  bin/staking-standalone
-2dddb07d03d6e4d119b3932c3f780b2f  bin/txgen
-b3324bbd89aaa6d38dd88bd96cbdf9f6  bin/wallet
-74554b67c429e3662efdb65d45e4b16a  bin/wallet_stress_test
+8abb8d0cf86497f762c5e0c8e2a064de  harmony
+cc08372c47aa97724ca7d150f7af8104  wallet
+395b6fb88c6c7024da74b3940ecab7d3  bootnode
+572cd85b566a7da2a53822b093212e15  staking-standalone
