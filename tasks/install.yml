@@ -1,5 +1,5 @@
 ---
-- name: Install upstream harmony wrappers
+- name: Install upstream harmony utils
   copy:
     src: "files/bin/{{ item }}"
     dest: "{{ harmony_home }}/"
@@ -9,8 +9,10 @@
   with_items:
     - node.sh
     - wallet.sh
+    - wallet
     - mystatus.sh
     - hmy.sh
+    - hmy
     - tui
 
 - name: Install harmony libs
@@ -42,12 +44,10 @@
     mode: preserve
   with_items:
     - harmony
-    - wallet
   register: staging_bins
 
 - name: Transfer harmony bins to live
   include_tasks: update.yml
   with_items:
     - harmony
-    - wallet
   when: checksums.changed or staging_bins.changed
