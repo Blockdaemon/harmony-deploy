@@ -1,4 +1,4 @@
-8abb8d0cf86497f762c5e0c8e2a064de  harmony
-cc08372c47aa97724ca7d150f7af8104  wallet
-395b6fb88c6c7024da74b3940ecab7d3  bootnode
-572cd85b566a7da2a53822b093212e15  staking-standalone
+7f0cfa344c78d57d888a12eddb16a0c0  harmony
+d150348941e8d1f82a37d663e18f729b  wallet
+f43303165150fb4c107c9541e472b648  bootnode
+587d1dbbf4b91d03f9e91c958ceef727  staking-standalone
