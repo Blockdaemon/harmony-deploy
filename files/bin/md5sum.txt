@@ -1,4 +1,6 @@
-7f0cfa344c78d57d888a12eddb16a0c0  harmony
-d150348941e8d1f82a37d663e18f729b  wallet
-f43303165150fb4c107c9541e472b648  bootnode
-587d1dbbf4b91d03f9e91c958ceef727  staking-standalone
+2b38a8b9442f2777bd06c3d14fe485c2  harmony
+80d0a09c2e8bd05e34231e39ee0a44a7  wallet
+6c9c6713bacaa1933b55a1a08cae8086  bootnode
+af50e9097285677be0132f7a0937d407  staking-standalone
+c4741dab9a6caee34ae959e297793369  libmcl.so
+7f0b59eeef1d46044e8f9acbb8c97277  libbls384_256.so
