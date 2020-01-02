@@ -1,6 +1,7 @@
 *.swp
 /*.retry
 /files/bin/bootnode
+/files/bin/hmy
 /files/bin/harmony
 /files/bin/harmony-dev
 /files/bin/harmony-update.out
@@ -12,6 +13,7 @@
 /files/bin/libmcl.so
 /files/bin/staging
 /files/bin/txgen
+/files/bin/tui
 /files/bin/wallet
 /hosts
 /credentials
