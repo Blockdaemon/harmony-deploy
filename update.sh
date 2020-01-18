@@ -35,4 +35,6 @@ while read -r line; do
     fi
 done < harmony-checksums.txt
 
+rm -f md5sum.txt::*
+
 popd
