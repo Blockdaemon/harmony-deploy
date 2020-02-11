@@ -116,6 +116,8 @@ usage: ${progname} [-1ch] [-k KEYFILE]
    -P             enable public rpc end point (default:off)
    -v             print out the version of the node.sh
    -V             print out the version of the Harmony binary
+   -B blacklist   specify file containing blacklisted accounts as a newline delimited file (default: ./.hmy/blacklist.txt)
+   -I             use statically linked Harmony binary
 
 examples:
 
@@ -149,7 +151,7 @@ BUCKET=pub.harmony.one
 OS=$(uname -s)
 
 unset start_clean loop run_as_root blspass do_not_download download_only metrics network node_type shard_id download_harmony_db db_file_to_dl
-unset upgrade_rel public_rpc
+unset upgrade_rel public_rpc blacklist
 start_clean=false
 loop=true
 run_as_root=true
@@ -161,11 +163,13 @@ node_type=validator
 shard_id=1
 download_harmony_db=false
 public_rpc=false
+blacklist=./.hmy/blacklist.txt
+static=false
 ${BLSKEYFILE=}
 
 unset OPTIND OPTARG opt
 OPTIND=1
-while getopts :1chk:sSp:dDmN:tT:i:ba:U:PvV opt
+while getopts :1chk:sSp:dDmN:tT:i:ba:U:PvVB:I opt
 do
    case "${opt}" in
    '?') usage "unrecognized option -${OPTARG}";;
@@ -185,9 +189,11 @@ do
    t) network=pangaea;;
    T) node_type="${OPTARG}";;
    i) shard_id="${OPTARG}";;
+   I) static=true;;
    a) db_file_to_dl="${OPTARG}";;
    U) upgrade_rel="${OPTARG}";;
    P) public_rpc=true;;
+   B) blacklist="${OPTARG}";;
    v) msg "version: $version"
       exit 0 ;;
    V) LD_LIBRARY_PATH=. ./harmony -version
@@ -258,7 +264,11 @@ if [ "$OS" == "Darwin" ]; then
 fi
 if [ "$OS" == "Linux" ]; then
    FOLDER=release/linux-x86_64/$REL/
-   BIN=( harmony libbls384_256.so libcrypto.so.10 libgmp.so.10 libgmpxx.so.4 libmcl.so md5sum.txt )
+   if [ "$static" == "true" ]; then
+      BIN=( harmony md5sum.txt )
+   else
+      BIN=( harmony libbls384_256.so libcrypto.so.10 libgmp.so.10 libgmpxx.so.4 libmcl.so md5sum.txt )
+   fi
 fi
 
 extract_checksum() {
@@ -302,7 +312,11 @@ download_binaries() {
    outdir="${1:-.}"
    mkdir -p "${outdir}"
    for bin in "${BIN[@]}"; do
-      curl -sSf http://${BUCKET}.s3.amazonaws.com/${FOLDER}${bin} -o "${outdir}/${bin}" || return $?
+      if [ "$static" == "true" ]; then
+         curl -sSf http://${BUCKET}.s3.amazonaws.com/${FOLDER}static/${bin} -o "${outdir}/${bin}" || return $?
+      else
+         curl -sSf http://${BUCKET}.s3.amazonaws.com/${FOLDER}${bin} -o "${outdir}/${bin}" || return $?
+      fi
       verify_checksum "${outdir}" "${bin}" md5sum.txt || return $?
       msg "downloaded ${bin}"
    done
@@ -630,6 +644,7 @@ do
       -blskey_file "${BLSKEYFILE}"
       -network_type="${network_type}"
       -dns_zone="${dns_zone}"
+      -blacklist="${blacklist}"
    )
    if ${public_rpc}; then
       args+=(
