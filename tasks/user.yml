@@ -14,6 +14,20 @@
       shell: "/bin/bash"
     ignore_errors: yes
 
+  - name: Make rclone config directory
+    file:
+      path: "{{ harmony_home }}/.config/rclone"
+      state: directory
+      mode: '0755'
+
+  - name: Configure rclone
+    copy:
+      src: "rclone.conf"
+      dest: "{{ harmony_home }}/.config/rclone/rclone.conf"
+      owner: "{{ harmony_user }}"
+      group: "{{ harmony_user }}"
+      mode: '0644'
+
   - name: Make harmony staging directory
     file:
       path: "{{ harmony_home }}/staging"

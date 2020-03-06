@@ -34,5 +34,5 @@
 
   - name: Install aptitude, dnsutils, and jq
     apt:
-      name: [ aptitude, dnsutils, jq ]
+      name: [ aptitude, dnsutils, jq, rclone ]
       update_cache: yes

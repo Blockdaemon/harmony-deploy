@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: true
+  gather_facts: true
+  pre_tasks:
+  - include_vars: defaults/main.yml
+
+  tasks:
+  - name: grab harmony archive via rclone
+    script:
+      cmd: rclone.sh
