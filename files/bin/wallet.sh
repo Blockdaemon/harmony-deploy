@@ -92,7 +92,7 @@ do_download () {
 
 # download all the binaries
    for bin in "${BIN[@]}"; do
-      curl http://${BUCKET}.s3.amazonaws.com/${FOLDER}${bin} -o ${bin}
+      curl -sS http://${BUCKET}.s3.amazonaws.com/${FOLDER}${bin} -o ${bin}
    done
 
    mkdir -p .hmy/keystore

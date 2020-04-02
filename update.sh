@@ -1,19 +1,23 @@
 #!/bin/bash
 pushd files/bin
-for i in node.sh wallet.sh mystatus.sh tui; do
+for i in node.sh wallet.sh tui; do
   curl -SsLO https://harmony.one/$i
   chmod +x $i
 done
-./wallet.sh -d <> /dev/null 2>&1
 
+for i in go-sdk/master/scripts/hmy.sh harmony-ops/master/monitoring/mystatus.sh; do
+    curl -SsLO https://raw.githubusercontent.com/harmony-one/$i
+    chmod +x $(basename $i)
+done
+
+sed -i -e 's/curl /curl -sS /' wallet.sh
+./wallet.sh -d > /dev/null # 2>&1
 if dd if=wallet count=1 bs=300 | grep Error; then
    rm -f wallet
 fi
 
-curl -O https://raw.githubusercontent.com/harmony-one/go-sdk/master/scripts/hmy.sh
-chmod +x hmy.sh
-./hmy.sh -d <> /dev/null 2>&1
-
+sed -i -e 's/curl /curl -sS /' hmy.sh
+./hmy.sh -d > /dev/null # 2>&1
 if dd if=hmy count=1 bs=300 | grep Error; then
    rm -f hmy
 fi
