@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-version="v1 20200327.0"
+version="v1 20200504.0"
 
 unset -v progname
 progname="${0##*/}"
@@ -105,7 +105,7 @@ usage: ${progname} [-1ch] [-k KEYFILE]
    -p passfile    use the given BLS passphrase file
    -d             just download the Harmony binaries (default: off)
    -D             do not download Harmony binaries (default: download when start)
-   -m             collect and upload node metrics to harmony prometheus + grafana
+   -m minpeer     set the minpeer of the network (default: $minpeer)
    -N network     join the given network (main, beta, pangaea; default: main)
    -t             equivalent to -N pangaea (deprecated)
    -T nodetype    specify the node type (validator, explorer; default: validator)
@@ -122,6 +122,7 @@ usage: ${progname} [-1ch] [-k KEYFILE]
    -M             support multi-key mode (default: off)
    -A             enable archival node mode (default: off)
    -R tracefile   enable p2p trace using tracefile (default: off)
+   -r address     start a pprof profiling server listening on the specified address
 
 examples:
 
@@ -154,30 +155,31 @@ usage() {
 BUCKET=pub.harmony.one
 OS=$(uname -s)
 
-unset start_clean loop run_as_root blspass do_not_download download_only metrics network node_type shard_id download_harmony_db db_file_to_dl
-unset upgrade_rel public_rpc blacklist multi_key archival verify TRACEFILE
+unset start_clean loop run_as_root blspass do_not_download download_only network node_type shard_id download_harmony_db db_file_to_dl
+unset upgrade_rel public_rpc blacklist multi_key archival verify TRACEFILE minpeer
 start_clean=false
 loop=true
 run_as_root=true
 do_not_download=false
 download_only=false
-metrics=false
 network=main
 node_type=validator
 shard_id=1
 download_harmony_db=false
 public_rpc=false
 blacklist=./.hmy/blacklist.txt
+pprof=""
 static=false
 multi_key=false
 archival=false
 verify=false
+minpeer=7
 ${BLSKEYFILE=}
 ${TRACEFILE=}
 
 unset OPTIND OPTARG opt
 OPTIND=1
-while getopts :1chk:sSp:dDmN:tT:i:ba:U:PvVIMB:AYR: opt
+while getopts :1chk:sSp:dDm:N:tT:i:ba:U:PvVIMB:AYR:r: opt
 do
    case "${opt}" in
    '?') usage "unrecognized option -${OPTARG}";;
@@ -193,7 +195,7 @@ do
    d) download_only=true;;
    M) multi_key=true;;
    D) do_not_download=true;;
-   m) metrics=true;;
+   m) minpeer="${OPTARG}";;
    N) network="${OPTARG}";;
    t) network=pangaea;;
    T) node_type="${OPTARG}";;
@@ -203,6 +205,7 @@ do
    U) upgrade_rel="${OPTARG}";;
    P) public_rpc=true;;
    B) blacklist="${OPTARG}";;
+   r) pprof="${OPTARG}";;
    v) msg "version: $version"
       exit 0 ;;
    V) LD_LIBRARY_PATH=. ./harmony -version
@@ -255,6 +258,15 @@ pangaea)
   network_type=pangaea
   dns_zone=pga.hmny.io
   ;;
+dryrun)
+  bootnodes=(
+    /ip4/54.86.126.90/tcp/9909/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
+    /ip4/52.40.84.2/tcp/9909/p2p/QmbPVwrqWsTYXq1RxGWcxx9SWaTUCfoo1wA6wmdbduWe29
+  )
+  REL=DRY
+  network_type=mainnet
+  dns_zone=dry.hmny.io
+  ;;
 *)
   err 64 "${network}: invalid network"
   ;;
@@ -278,10 +290,10 @@ fi
 if [ "$OS" == "Linux" ]; then
    FOLDER=release/linux-x86_64/$REL
    if [ "$static" == "true" ]; then
-      BIN=( harmony md5sum.txt )
+      BIN=( harmony node.sh md5sum.txt )
       FOLDER=${FOLDER}/static
    else
-      BIN=( harmony libbls384_256.so libcrypto.so.10 libgmp.so.10 libgmpxx.so.4 libmcl.so md5sum.txt )
+      BIN=( harmony node.sh libbls384_256.so libcrypto.so.10 libgmp.so.10 libgmpxx.so.4 libmcl.so md5sum.txt )
    fi
 fi
 
@@ -509,7 +521,6 @@ fi
 
 NODE_PORT=9000
 PUB_IP=
-METRICS=
 PUSHGATEWAY_IP=
 PUSHGATEWAY_PORT=
 
@@ -665,11 +676,11 @@ do
       -bootnodes "${BN_MA}"
       -ip "${PUB_IP}"
       -port "${NODE_PORT}"
-      -is_genesis
       -blskey_file "${BLSKEYFILE}"
       -network_type="${network_type}"
       -dns_zone="${dns_zone}"
       -blacklist="${blacklist}"
+      -min_peers="${minpeer}"
    )
    args+=(
       -is_archival="${archival}"
@@ -684,21 +695,17 @@ do
       -public_rpc
       )
    fi
+   if [ ! -z "${pprof}" ]; then
+      args+=(
+      -pprof "${pprof}"
+      )
+   fi
 # backward compatible with older harmony node software
    case "${node_type}" in
    explorer)
       args+=(
       -node_type="${node_type}"
       -shard_id="${shard_id}"
-      )
-      ;;
-   esac
-   case "${metrics}" in
-   true)
-      args+=(
-         -metrics "${metrics}"
-         -pushgateway_ip "${PUSHGATEWAY_IP}"
-         -pushgateway_port "${PUSHGATEWAY_PORT}"
       )
       ;;
    esac

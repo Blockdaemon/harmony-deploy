@@ -8,6 +8,8 @@ bootnodes=(
 )
 network_type=mainnet
 dns_zone=t.hmny.io
+blacklist=./.hmy/blacklist.txt
+minpeer=7
 
 unset -v BN_MA bn
 for bn in "${bootnodes[@]}"
@@ -99,4 +101,16 @@ myip
 
 rm -rf .dht-* # NTL lets be rude
 
-LD_LIBRARY_PATH=. exec ./harmony${DEV} -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT $MODE -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase -network_type="${network_type}" -dns_zone="${dns_zone}" -log_max_size=100
+# from upstream
+#  args=(
+#     -bootnodes "${BN_MA}"
+#     -ip "${PUB_IP}"
+#     -port "${NODE_PORT}"
+#     -blskey_file "${BLSKEYFILE}"
+#     -network_type="${network_type}"
+#     -dns_zone="${dns_zone}"
+#     -blacklist="${blacklist}"
+#     -min_peers="${minpeer}"
+#  )
+
+LD_LIBRARY_PATH=. exec ./harmony${DEV} $MODE -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase -network_type="${network_type}" -dns_zone="${dns_zone}" -blacklist="${blacklist}" -min_peers="${minpeer}" -log_max_size=100

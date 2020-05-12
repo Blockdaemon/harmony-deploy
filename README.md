@@ -68,5 +68,5 @@ ansible-playbook fetch.yml
 ## To check balances on the node
 
 ```
-./wallet.sh balances --address <public_address>
+./hmy.sh balances <public_address>
 ```
