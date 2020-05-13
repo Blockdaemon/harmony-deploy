@@ -4,13 +4,13 @@
     harmony_mode: "-node_type explorer -shard_id={{ shard_id }} -public_rpc"
   when: is_explorer
 
-- name: Make harmony logfile directory
-  file:
-    path: "/var/log/harmonyd"
-    state: directory
-    owner: "{{ harmony_user }}"
-    group: "{{ harmony_user }}"
-    mode: '0755'
+#- name: Make harmony logfile directory
+#  file:
+#    path: "/var/log/harmonyd"
+#    state: directory
+#    owner: "{{ harmony_user }}"
+#    group: "{{ harmony_user }}"
+#    mode: '0755'
 
 - name: Install harmonyd logrotate config
   template:

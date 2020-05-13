@@ -24,9 +24,9 @@ progname="${0##*/}"
 pid=$$
 pidfile=/run/$progname/$progname.pid
 # output stdout to file
-exec 1>> /var/log/$progname/harmony.log
+#exec 1>> /var/log/$progname/harmony.log
 # output stderr to syslog
-exec 2> >(logger --id=$pid -t $progname)
+#exec 2> >(logger --id=$pid -t $progname)
 
 if [ ! -d /run/$progname -o ! -w /run/$progname ]; then
    echo "ERROR /run/$progname not a writable directory" >&2
