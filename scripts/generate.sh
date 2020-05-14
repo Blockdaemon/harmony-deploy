@@ -47,7 +47,7 @@ initialize() {
 
   unset generated
   unset keys
-  
+
   declare -ag keys
   generated=0
   packages=(jq curl)
@@ -79,7 +79,7 @@ check_dependencies() {
     if command -v yum >/dev/null 2>&1; then
       echo "sudo yum install ${need_to_install}"
     fi
-    
+
     exit 1
   fi
 }
@@ -101,12 +101,12 @@ generate_keys() {
 
   if (( ${#keys[@]} )); then
     echo "Generated the following bls keys for shard ${shard}:"
-    
+
     for key in "${keys[@]}"; do
       echo "${key}"
     done
   fi
-  
+
   echo ""
 }
 
