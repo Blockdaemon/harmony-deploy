@@ -82,14 +82,14 @@ git clone git@github.com:harmony-one/bls
 git clone git@github.com:harmony-one/mcl
 ```
 
-## Check out our fork of s3
+## Check out our fork of t3
 
 ```bash
 git clone git@github.com:Blockdaemon/harmony.git
 cd harmony
 git remote add upstream git@github.com:harmony-one/harmony
 git fetch --all
-git checkout -b s3 upstream/s3
+git checkout -b t3 upstream/t3
 ```
 
 ## Build
@@ -114,12 +114,12 @@ git remote prune upstream
 git remote prune origin
 git checkout go.mod
 git checkout master && git rebase upstream/master
-git checkout s3 && git rebase upstream/s3
+git checkout t3 && git rebase upstream/t3
 ```
 
 ## Push result to our fork
 
 ```bash
-git push origin s3
+git push origin t3
 git push origin master
 ```

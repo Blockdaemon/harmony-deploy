@@ -15,16 +15,16 @@
     - hmy
     - tui
 
-- name: Install harmony libs
-  copy:
-    src: "{{ item }}"
-    dest: "{{ harmony_home }}"
-    owner: "{{ harmony_user }}"
-    group: "{{ harmony_user }}"
-    mode: preserve
-  with_fileglob:
-    - files/bin/lib*
-  notify: harmony restart
+#- name: Install harmony libs
+#  copy:
+#    src: "{{ item }}"
+#    dest: "{{ harmony_home }}"
+#    owner: "{{ harmony_user }}"
+#    group: "{{ harmony_user }}"
+#    mode: preserve
+#  with_fileglob:
+#    - files/bin/lib*
+#  notify: harmony restart
 
 - name: Install harmony checksum file
   copy:
