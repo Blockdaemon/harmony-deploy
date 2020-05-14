@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-version="v1 20200504.0"
+version="v1 20200513.0"
 
 unset -v progname
 progname="${0##*/}"
@@ -56,6 +56,7 @@ function check_root
    if [[ $EUID -ne 0 ]]; then
       msg "this script must be run as root to setup environment"
       msg please use \"sudo ${progname}\"
+      msg "you may use -S option to run as normal user"
       exit 1
    fi
 }
@@ -70,15 +71,62 @@ function add_env
 function setup_env
 {
    check_root
-
-# setup environment variables, may not be nessary
-   sysctl -w net.core.somaxconn=1024
+   ### KERNEL TUNING ###
+   # Increase size of file handles and inode cache
+   sysctl -w fs.file-max=2097152
+   # Do less swapping
+   sysctl -w vm.swappiness=10
+   sysctl -w vm.dirty_ratio=60
+   sysctl -w vm.dirty_background_ratio=2
+   # Sets the time before the kernel considers migrating a proccess to another core
+   sysctl -w kernel.sched_migration_cost_ns=5000000
+   ### GENERAL NETWORK SECURITY OPTIONS ###
+   # Number of times SYNACKs for passive TCP connection.
+   sysctl -w net.ipv4.tcp_synack_retries=2
+   # Allowed local port range
+   sysctl -w net.ipv4.ip_local_port_range='2000 65535'
+   # Protect Against TCP Time-Wait
+   sysctl -w net.ipv4.tcp_rfc1337=1
+   # Control Syncookies
+   sysctl -w net.ipv4.tcp_syncookies=1
+   # Decrease the time default value for tcp_fin_timeout connection
+   sysctl -w net.ipv4.tcp_fin_timeout=15
+   # Decrease the time default value for connections to keep alive
+   sysctl -w net.ipv4.tcp_keepalive_time=300
+   sysctl -w net.ipv4.tcp_keepalive_probes=5
+   sysctl -w net.ipv4.tcp_keepalive_intvl=15
+   ### TUNING NETWORK PERFORMANCE ###
+   # Default Socket Receive Buffer
+   sysctl -w net.core.rmem_default=31457280
+   # Maximum Socket Receive Buffer
+   sysctl -w net.core.rmem_max=33554432
+   # Default Socket Send Buffer
+   sysctl -w net.core.wmem_default=31457280
+   # Maximum Socket Send Buffer
+   sysctl -w net.core.wmem_max=33554432
+   # Increase number of incoming connections
+   sysctl -w net.core.somaxconn=8096
+   # Increase number of incoming connections backlog
    sysctl -w net.core.netdev_max_backlog=65536
+   # Increase the maximum amount of option memory buffers
+   sysctl -w net.core.optmem_max=25165824
+   sysctl -w net.ipv4.tcp_max_syn_backlog=8192
+   # Increase the maximum total buffer-space allocatable
+   # This is measured in units of pages (4096 bytes)
+   sysctl -w net.ipv4.tcp_mem='786432 1048576 26777216'
+   sysctl -w net.ipv4.udp_mem='65536 131072 262144'
+   # Increase the read-buffer space allocatable
+   sysctl -w net.ipv4.tcp_rmem='8192 87380 33554432'
+   sysctl -w net.ipv4.udp_rmem_min=16384
+   # Increase the write-buffer-space allocatable
+   sysctl -w net.ipv4.tcp_wmem='8192 65536 33554432'
+   sysctl -w net.ipv4.udp_wmem_min=16384
+   # Increase the tcp-time-wait buckets pool size to prevent simple DOS attacks
+   sysctl -w net.ipv4.tcp_max_tw_buckets=1440000
    sysctl -w net.ipv4.tcp_tw_reuse=1
-   sysctl -w net.ipv4.tcp_rmem='4096 65536 16777216'
-   sysctl -w net.ipv4.tcp_wmem='4096 65536 16777216'
-   sysctl -w net.ipv4.tcp_mem='65536 131072 262144'
-
+   sysctl -w net.ipv4.tcp_fastopen=3
+   sysctl -w net.ipv4.tcp_window_scaling=1
+   
    add_env /etc/security/limits.conf "* soft     nproc          65535"
    add_env /etc/security/limits.conf "* hard     nproc          65535"
    add_env /etc/security/limits.conf "* soft     nofile         65535"
@@ -90,12 +138,26 @@ function setup_env
    add_env /etc/pam.d/common-session "session required pam_limits.so"
 }
 
+function check_pkg_management
+{
+   if which yum > /dev/null; then
+      PKG_INSTALL='sudo yum install -y'
+      return
+   fi
+   if which apt-get > /dev/null; then
+      PKG_INSTALL='sudo apt-get install -y'
+      return
+   fi
+}
+
 ######## main #########
 print_usage() {
    cat <<- ENDEND
 
-usage: ${progname} [-1ch] [-k KEYFILE]
-   -c             back up database/logs and start clean
+usage: ${progname} [options]
+
+options:
+   -c             back up database/logs and start clean (not for mainnet)
                   (use only when directed by Harmony)
    -1             do not loop; run once and exit
    -h             print this help and exit
@@ -105,9 +167,8 @@ usage: ${progname} [-1ch] [-k KEYFILE]
    -p passfile    use the given BLS passphrase file
    -d             just download the Harmony binaries (default: off)
    -D             do not download Harmony binaries (default: download when start)
-   -m minpeer     set the minpeer of the network (default: $minpeer)
-   -N network     join the given network (main, beta, pangaea; default: main)
-   -t             equivalent to -N pangaea (deprecated)
+   -N network     join the given network (mainnet, testnet, staking, partner, stress, devnet, tnet; default: mainnet)
+   -n port        specify the public base port of the node (default: 9000)
    -T nodetype    specify the node type (validator, explorer; default: validator)
    -i shardid     specify the shard id (valid only with explorer node; default: 1)
    -b             download harmony_db files from shard specified by -i <shardid> (default: off)
@@ -116,13 +177,18 @@ usage: ${progname} [-1ch] [-k KEYFILE]
    -P             enable public rpc end point (default:off)
    -v             print out the version of the node.sh
    -V             print out the version of the Harmony binary
-   -B blacklist   specify file containing blacklisted accounts as a newline delimited file (default: ./.hmy/blacklist.txt)
-   -I             use statically linked Harmony binary
+   -z             run in staking mode
+   -y             run in legacy, foundational-node mode (default)
    -Y             verify the signature of the downloaded binaries (default: off)
+   -m minpeer     specify minpeers for bootstrap (default: 6)
    -M             support multi-key mode (default: off)
+   -f blsfolder   folder that stores the bls keys and corresponding passphrases (default: ./.hmy/blskeys)
    -A             enable archival node mode (default: off)
-   -R tracefile   enable p2p trace using tracefile (default: off)
+   -B blacklist   specify file containing blacklisted accounts as a newline delimited file (default: ./.hmy/blacklist.txt)
    -r address     start a pprof profiling server listening on the specified address
+   -I             use statically linked Harmony binary (default: true)
+   -R tracefile   enable p2p trace using tracefile (default: off)
+   -L log_level   logging verbosity: 0=silent, 1=error, 2=warn, 3=info, 4=debug, 5=detail (default: $log_level)
 
 examples:
 
@@ -142,6 +208,24 @@ examples:
 # upgrade harmony binaries from specified repo
    ${progname} -1 -U upgrade
 
+# start the node in a different port 9010
+   ${progname} -n 9010
+
+# multi-bls: place all keys/passphrases under .hmy/blskeys
+# e.g. <blskey>.key and <blskey>.pass
+   ${progname} -S -M 
+
+# multi-bls: specify folder that contains bls keys
+   ${progname} -S -M -f /home/xyz/myfolder
+
+# multi-bls using default passphrase: place all keys under .hmy/blskeys
+# supply passphrase file using -p option (single passphrase will be used for all bls keys)
+   ${progname} -S -M -p blspass.txt
+
+# multi-bls using user input passphrase: place all keys under .hmy/blskeys
+# supply passphrase for each of the bls key file when prompted
+   ${progname} -S -M
+
 ENDEND
 }
 
@@ -156,30 +240,34 @@ BUCKET=pub.harmony.one
 OS=$(uname -s)
 
 unset start_clean loop run_as_root blspass do_not_download download_only network node_type shard_id download_harmony_db db_file_to_dl
-unset upgrade_rel public_rpc blacklist multi_key archival verify TRACEFILE minpeer
+unset upgrade_rel public_rpc staking_mode pub_port multi_key blsfolder blacklist verify TRACEFILE minpeers max_bls_keys_per_node log_level
 start_clean=false
 loop=true
 run_as_root=true
 do_not_download=false
 download_only=false
-network=main
+network=mainnet
 node_type=validator
-shard_id=1
+shard_id=-1
 download_harmony_db=false
 public_rpc=false
+staking_mode=false
+multi_key=false
+blsfolder=./.hmy/blskeys
+archival=false
 blacklist=./.hmy/blacklist.txt
 pprof=""
-static=false
-multi_key=false
-archival=false
+static=true
 verify=false
-minpeer=7
+minpeers=6
+max_bls_keys_per_node=10
+log_level=3
 ${BLSKEYFILE=}
 ${TRACEFILE=}
 
 unset OPTIND OPTARG opt
 OPTIND=1
-while getopts :1chk:sSp:dDm:N:tT:i:ba:U:PvVIMB:AYR:r: opt
+while getopts :1chk:sSp:dDN:T:i:ba:U:PvVyzn:MAIB:r:Y:f:R:m:L: opt
 do
    case "${opt}" in
    '?') usage "unrecognized option -${OPTARG}";;
@@ -193,11 +281,12 @@ do
    S) run_as_root=false ;;
    p) blspass="${OPTARG}";;
    d) download_only=true;;
-   M) multi_key=true;;
    D) do_not_download=true;;
-   m) minpeer="${OPTARG}";;
+   m) minpeers="${OPTARG}";;
+   M) multi_key=true;;
+   f) blsfolder="${OPTARG}";;
    N) network="${OPTARG}";;
-   t) network=pangaea;;
+   n) pub_port="${OPTARG}";;
    T) node_type="${OPTARG}";;
    i) shard_id="${OPTARG}";;
    I) static=true;;
@@ -211,14 +300,17 @@ do
    V) LD_LIBRARY_PATH=. ./harmony -version
       exit 0 ;;
    Y) verify=true;;
+   z) staking_mode=true;;
+   y) staking_mode=false;;
    A) archival=true;;
    R) TRACEFILE="${OPTARG}";;
+   L) log_level="${OPTARG}";;
    *) err 70 "unhandled option -${OPTARG}";;  # EX_SOFTWARE
    esac
 done
 shift $((${OPTIND} - 1))
 
-unset -v bootnodes REL network_type dns_zone
+unset -v bootnodes REL network_type dns_zone syncdir
 
 case "${node_type}" in
 validator) ;;
@@ -228,7 +320,7 @@ explorer) archival=true;;
 esac
 
 case "${network}" in
-main)
+mainnet)
   bootnodes=(
     /ip4/100.26.90.187/tcp/9874/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
     /ip4/54.213.43.194/tcp/9874/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9
@@ -238,34 +330,66 @@ main)
   REL=mainnet
   network_type=mainnet
   dns_zone=t.hmny.io
+  syncdir=mainnet.min
   ;;
-beta)
+testnet)  # TODO: update Testnet configs once LRTN is upgraded
   bootnodes=(
-    /ip4/54.213.43.194/tcp/9868/p2p/QmZJJx6AdaoEkGLrYG4JeLCKeCKDjnFz2wfHNHxAqFSGA9
-    /ip4/100.26.90.187/tcp/9868/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
-    /ip4/13.113.101.219/tcp/12018/p2p/QmQayinFSgMMw5cSpDUiD9pQ2WeP6WNmGxpZ6ou3mdVFJX
+    /ip4/54.218.73.167/tcp/9876/p2p/QmWBVCPXQmc2ULigm3b9ayCZa15gj25kywiQQwPhHCZeXj
+    /ip4/18.232.171.117/tcp/9876/p2p/QmfJ71Eb7XTDs8hX2vPJ8un4L7b7RiDk6zCzWVxLXGA6MA
   )
   REL=testnet
   network_type=testnet
-  dns_zone=b.hmny.io
+  dns_zone=p.hmny.io
+  syncdir=lrtn
   ;;
-pangaea)
+tnet)
   bootnodes=(
-    /ip4/54.86.126.90/tcp/9880/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
-    /ip4/52.40.84.2/tcp/9880/p2p/QmbPVwrqWsTYXq1RxGWcxx9SWaTUCfoo1wA6wmdbduWe29
+    /ip4/54.86.126.90/tcp/9889/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
+    /ip4/52.40.84.2/tcp/9889/p2p/QmbPVwrqWsTYXq1RxGWcxx9SWaTUCfoo1wA6wmdbduWe29
+  )
+  REL=tnet
+  network_type=testnet
+  dns_zone=tn.hmny.io
+  syncdir=tnet
+  ;;
+staking)
+  bootnodes=(
+    /ip4/54.86.126.90/tcp/9867/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
+    /ip4/52.40.84.2/tcp/9867/p2p/QmbPVwrqWsTYXq1RxGWcxx9SWaTUCfoo1wA6wmdbduWe29
   )
   REL=pangaea
   network_type=pangaea
-  dns_zone=pga.hmny.io
+  dns_zone=os.hmny.io
+  syncdir=ostn
   ;;
-dryrun)
+partner)
   bootnodes=(
-    /ip4/54.86.126.90/tcp/9909/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
-    /ip4/52.40.84.2/tcp/9909/p2p/QmbPVwrqWsTYXq1RxGWcxx9SWaTUCfoo1wA6wmdbduWe29
+    /ip4/52.40.84.2/tcp/9800/p2p/QmbPVwrqWsTYXq1RxGWcxx9SWaTUCfoo1wA6wmdbduWe29
+    /ip4/54.86.126.90/tcp/9800/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
   )
-  REL=DRY
-  network_type=mainnet
-  dns_zone=dry.hmny.io
+  REL=partner
+  network_type=partner
+  dns_zone=ps.hmny.io
+  syncdir=pstn
+  ;;
+stn|stress|stressnet)
+  bootnodes=(
+    /ip4/52.40.84.2/tcp/9842/p2p/QmbPVwrqWsTYXq1RxGWcxx9SWaTUCfoo1wA6wmdbduWe29
+  )
+  REL=stressnet
+  network_type=stressnet
+  dns_zone=stn.hmny.io
+  syncdir=stn
+  ;;
+devnet)
+  bootnodes=(
+    /ip4/54.86.126.90/tcp/9870/p2p/Qmdfjtk6hPoyrH1zVD9PEH4zfWLo38dP2mDvvKXfh3tnEv
+    /ip4/52.40.84.2/tcp/9870/p2p/QmbPVwrqWsTYXq1RxGWcxx9SWaTUCfoo1wA6wmdbduWe29
+  )
+  REL=devnet
+  network_type=devnet
+  dns_zone=pga.hmny.io
+  syncdir=devnet
   ;;
 *)
   err 64 "${network}: invalid network"
@@ -285,15 +409,11 @@ fi
 
 if [ "$OS" == "Darwin" ]; then
    FOLDER=release/darwin-x86_64/$REL
-   BIN=( harmony libbls384_256.dylib libcrypto.1.0.0.dylib libgmp.10.dylib libgmpxx.4.dylib libmcl.dylib md5sum.txt )
 fi
 if [ "$OS" == "Linux" ]; then
    FOLDER=release/linux-x86_64/$REL
    if [ "$static" == "true" ]; then
-      BIN=( harmony node.sh md5sum.txt )
       FOLDER=${FOLDER}/static
-   else
-      BIN=( harmony node.sh libbls384_256.so libcrypto.so.10 libgmp.so.10 libgmpxx.so.4 libmcl.so md5sum.txt )
    fi
 fi
 
@@ -332,13 +452,35 @@ verify_checksum() {
    return 0
 }
 
+verify_signature() {
+   local dir file 
+   dir="${1}"
+   file="${dir}/${2}"
+   sigfile="${dir}/${2}.sig"
+
+   result=$(openssl dgst -sha256 -verify "${outdir}/harmony_pubkey.pem" -signature "${sigfile}" "${file}" 2>&1)
+   echo ${result}
+   if  [[ ${result} != "Verified OK" ]]; then
+	   return 1
+   fi
+   return 0
+}
+
 download_binaries() {
-   local outdir
+   local outdir status
    ${do_not_download} && return 0
-   outdir="${1:-.}"
+   outdir="${1}"
    mkdir -p "${outdir}"
-   for bin in "${BIN[@]}"; do
-      curl -sSf http://${BUCKET}.s3.amazonaws.com/${FOLDER}/${bin} -o "${outdir}/${bin}" || return $?
+   for bin in $(cut -c35- "${outdir}/md5sum.txt"); do
+      status=0
+      curl -sSf http://${BUCKET}.s3.amazonaws.com/${FOLDER}/${bin} -o "${outdir}/${bin}" || status=$?
+      case "${status}" in
+      0) ;;
+      *)
+         msg "cannot download ${bin} (status ${status})"
+         return ${status}
+         ;;
+      esac
 
       if $verify; then
          curl -sSf http://${BUCKET}.s3.amazonaws.com/${FOLDER}/${bin}.sig -o "${outdir}/${bin}.sig" || status=$?
@@ -354,8 +496,8 @@ download_binaries() {
       verify_checksum "${outdir}" "${bin}" md5sum.txt || return $?
       msg "downloaded ${bin}"
    done
-   chmod +x "${outdir}/harmony"
-   (cd "${outdir}" && exec openssl sha256 "${BIN[@]}") > "${outdir}/harmony-checksums.txt"
+   chmod +x "${outdir}/harmony" "${outdir}/node.sh"
+   (cd "${outdir}" && exec openssl sha256 $(cut -c35- md5sum.txt)) > "${outdir}/harmony-checksums.txt"
 }
 
 check_free_disk() {
@@ -449,9 +591,34 @@ download_harmony_db_file() {
    done
 }
 
+any_new_binaries() {
+   local outdir
+   ${do_not_download} && return 0
+   outdir="${1}"
+   mkdir -p "${outdir}"
+   curl -L https://harmony.one/pubkey -o "${outdir}/harmony_pubkey.pem"
+   if ! grep -q "BEGIN\ PUBLIC\ KEY" "${outdir}/harmony_pubkey.pem"; then
+      msg "failed to downloaded harmony public signing key"
+      return 1
+   fi
+   curl -sSf http://${BUCKET}.s3.amazonaws.com/${FOLDER}/md5sum.txt -o "${outdir}/md5sum.txt.new" || return $?
+   if diff $outdir/md5sum.txt.new md5sum.txt
+   then
+      rm "${outdir}/md5sum.txt.new"
+   else
+      mv "${outdir}/md5sum.txt.new" "${outdir}/md5sum.txt"
+      return 1
+   fi
+}
+
 if ${download_only}; then
-   download_binaries staging || err 69 "download node software failed"
-   msg "downloaded files are in staging direectory"
+   if any_new_binaries staging
+   then
+      msg "binaries did not change in staging"
+   else
+      download_binaries staging || err 69 "download node software failed"
+      msg "downloaded files are in staging direectory"
+   fi
    exit 0
 fi
 
@@ -497,29 +664,14 @@ if ! ${multi_key}; then
    esac
 fi
 
-any_new_binaries() {
-   local outdir
-   ${do_not_download} && return 0
-   outdir="${1:-.}"
-   mkdir -p "${outdir}"
-   curl -sSf http://${BUCKET}.s3.amazonaws.com/${FOLDER}/md5sum.txt -o "${outdir}/md5sum.txt.new" || return $?
-   if diff $outdir/md5sum.txt.new md5sum.txt
-   then
-      rm "${outdir}/md5sum.txt.new"
-   else
-      mv "${outdir}/md5sum.txt.new" "${outdir}/md5sum.txt"
-      return 1
-   fi
-}
-
-if any_new_binaries
+if any_new_binaries .
 then
    msg "binaries did not change"
 else
-   download_binaries || err 69 "initial node software update failed"
+   download_binaries . || err 69 "initial node software update failed"
 fi
 
-NODE_PORT=9000
+NODE_PORT=${pub_port:-9000}
 PUB_IP=
 PUSHGATEWAY_IP=
 PUSHGATEWAY_PORT=
@@ -534,6 +686,7 @@ fi
 
 # find my public ip address
 myip
+check_pkg_management
 
 unset -v BN_MA bn
 for bn in "${bootnodes[@]}"
@@ -541,15 +694,45 @@ do
   BN_MA="${BN_MA+"${BN_MA},"}${bn}"
 done
 
-if ${start_clean}
+if [[ "${start_clean}" == "true" && "${network_type}" != "mainnet" ]]
 then
-   msg "backing up old database/logs (-c)"
-   unset -v backup_dir now
-   now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-   mkdir -p backups
-   backup_dir=$(mktemp -d "backups/${now}.XXXXXX")
-   mv harmony_db_* latest "${backup_dir}/" || :
-   rm -rf latest
+   msg "cleaning up old database (-c)"
+   # set a 2s timeout, and set its default return value to Y (true)
+   read -t 2 -rp "Remove old database? (Y/n) " yesno
+   yesno=${yesno:-Y}
+   echo
+   if [[ "$yesno" == "y" || "$yesno" == "Y" ]]; then
+      unset -v backup_dir now
+      now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+      mkdir -p backups; rm -rf backups/*
+      backup_dir=$(mktemp -d "backups/${now}.XXXXXX")
+      mv -f harmony_db_* .dht* "${backup_dir}/" 2>/dev/null || :
+   fi
+
+   # install unzip as dependency of rclone
+   if ! which unzip > /dev/null; then
+      $PKG_INSTALL unzip
+   fi
+   # do rclone sync
+   if ! which rclone > /dev/null; then
+      msg "installing rclone to fast sync db"
+      msg "curl https://rclone.org/install.sh | sudo bash"
+      curl https://rclone.org/install.sh | sudo bash
+      mkdir -p ~/.config/rclone
+   fi
+   if ! grep -q 'hmy' ~/.config/rclone/rclone.conf 2> /dev/null; then
+      msg "adding [hmy] profile to rclone.conf"
+      cat<<-EOT>>~/.config/rclone/rclone.conf
+[hmy]
+type = s3
+provider = AWS
+env_auth = false
+region = us-west-1
+acl = public-read
+EOT
+   fi
+   msg "Syncing harmony_db_0"
+   rclone sync -P hmy://pub.harmony.one/$syncdir/harmony_db_0 harmony_db_0
 fi
 mkdir -p latest
 
@@ -633,6 +816,52 @@ kill_node() {
    done
 }
 
+unset -v save_pass_file
+save_pass_file=true
+prompt_save=false
+read_bls_pass() {
+   for f in ${blsfolder}/*.key
+   do
+      if [ ! -f $f ]; then
+         err 10 "could not find bls key file: $f"
+      fi
+      passfile=${blsfolder}/$(basename "${f%.*}").pass
+      if [ ! -f "$passfile" ]; then
+         unset -v passphrase
+         read -rsp "Enter passphrase for the BLS key file $f: " passphrase
+         echo ${passphrase} | tee $passfile
+         echo "Passphrase is temporarely saved to: $passfile"
+         prompt_save=true
+      fi
+   done
+   if ${prompt_save} ; then
+      while true
+      do
+         read -t 3 -rp "Do you wish to delete the saved passphrase files after successful start of node? (y|n):" yn
+         yn=${yn:-Y}
+         case $yn in
+            [Yy]*) save_pass_file=false
+            break;;
+            [Nn]*) save_pass_file=true
+            break;;
+            *) sleep 1 && echo "Please answer yes (y|Y) or no (n|N)";;
+         esac
+      done
+      prompt_save=false
+   fi
+}
+
+rm_bls_pass() {
+   if ! ${save_pass_file} ; then
+      for f in ${blsfolder}/*.pass
+      do
+         if [ -f $f ]; then
+            rm $f
+         fi
+      done
+   fi
+}
+
 {
    while ${loop}
    do
@@ -654,19 +883,23 @@ kill_node() {
          continue
       fi
       msg "binaries changed; moving from staging into main"
-      (cd staging; exec mv harmony-checksums.txt "${BIN[@]}" ..) || continue
+      (cd staging; exec mv harmony-checksums.txt $(cut -c35- md5sum.txt) ..) || continue
       msg "binaries updated, killing node to restart"
       kill_node
    done
 } > harmony-update.out 2>&1 &
 check_update_pid=$!
 
-if [ -z "${blspass}" ]; then
-   unset -v passphrase
-   read -rsp "Enter passphrase for the BLS key file ${BLSKEYFILE}: " passphrase
-   echo
-elif [ ! -f "${blspass}" ]; then
-   err 10 "can't find the ${blspass} file"
+if ! ${multi_key}; then
+   if [ -z "${blspass}" ]; then
+      unset -v passphrase
+      read -rsp "Enter passphrase for the BLS key file ${BLSKEYFILE}: " passphrase
+      echo
+   elif [ ! -f "${blspass}" ]; then
+      err 10 "can't find the ${blspass} file"
+   fi
+else
+   read_bls_pass
 fi
 
 while :
@@ -676,11 +909,12 @@ do
       -bootnodes "${BN_MA}"
       -ip "${PUB_IP}"
       -port "${NODE_PORT}"
-      -blskey_file "${BLSKEYFILE}"
       -network_type="${network_type}"
       -dns_zone="${dns_zone}"
       -blacklist="${blacklist}"
-      -min_peers="${minpeer}"
+      -min_peers="${minpeers}"
+      -max_bls_keys_per_node="${max_bls_keys_per_node}"
+      -verbosity="${log_level}"
    )
    args+=(
       -is_archival="${archival}"
@@ -688,6 +922,11 @@ do
    if ! ${multi_key}; then
       args+=(
       -blskey_file "${BLSKEYFILE}"
+      )
+   fi
+   if ${multi_key}; then
+      args+=(
+         -blsfolder "${blsfolder}"
       )
    fi
    if ${public_rpc}; then
@@ -702,6 +941,19 @@ do
    fi
 # backward compatible with older harmony node software
    case "${node_type}" in
+   validator)
+      case "${shard_id}" in
+      ?*)
+         args+=(
+            -shard_id="${shard_id}"
+         )
+         if ${staking_mode}
+         then
+            args+=(-staking="${staking_mode}")
+         fi
+         ;;
+      esac
+      ;;
    explorer)
       args+=(
       -node_type="${node_type}"
@@ -710,7 +962,7 @@ do
       ;;
    esac
    case "${TRACEFILE}" in
-      "") msg "not enabling p2p trace" ;;
+      "") ;;
       *) msg "WARN: enabled p2p tracefile: $TRACEFILE. Be aware of the file size."
          export P2P_TRACEFILE=${TRACEFILE} ;;
    esac
@@ -719,6 +971,7 @@ do
    *) ld_path_var=LD_LIBRARY_PATH;;
    esac
    run() {
+      (sleep 30 && rm_bls_pass)&
       env "${ld_path_var}=$(pwd)" ./harmony "${args[@]}" "${@}"
    }
    case "${blspass:+set}" in
@@ -727,7 +980,12 @@ do
    esac || msg "node process finished with status $?"
    ${loop} || break
    msg "restarting in 10s..."
+   save_pass_file=false
+   rm_bls_pass
    sleep 10
+   if ${multi_key}; then
+      read_bls_pass
+   fi
 done
 
 # vim: set expandtab:ts=3

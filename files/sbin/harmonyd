@@ -9,7 +9,8 @@ bootnodes=(
 network_type=mainnet
 dns_zone=t.hmny.io
 blacklist=./.hmy/blacklist.txt
-minpeer=7
+minpeers=6
+max_bls_keys_per_node=10
 
 unset -v BN_MA bn
 for bn in "${bootnodes[@]}"
@@ -18,25 +19,6 @@ do
 done
 
 . /etc/default/harmonyd
-
-unset -v progname
-progname="${0##*/}"
-pid=$$
-pidfile=/run/$progname/$progname.pid
-# output stdout to file
-#exec 1>> /var/log/$progname/harmony.log
-# output stderr to syslog
-#exec 2> >(logger --id=$pid -t $progname)
-
-if [ ! -d /run/$progname -o ! -w /run/$progname ]; then
-   echo "ERROR /run/$progname not a writable directory" >&2
-   exit 1
-fi
-
-# use filehandle 9 as a locked handle to pidfile
-exec 9>$pidfile
-flock -n 9 || exit 1
-echo $pid 1>&9
 
 unset -f msg err
 
@@ -106,11 +88,11 @@ rm -rf .dht-* # NTL lets be rude
 #     -bootnodes "${BN_MA}"
 #     -ip "${PUB_IP}"
 #     -port "${NODE_PORT}"
-#     -blskey_file "${BLSKEYFILE}"
 #     -network_type="${network_type}"
 #     -dns_zone="${dns_zone}"
 #     -blacklist="${blacklist}"
-#     -min_peers="${minpeer}"
-#  )
+#     -min_peers="${minpeers}"
+#     -max_bls_keys_per_node="${max_bls_keys_per_node}"
+#     -verbosity="${log_level}"
 
-LD_LIBRARY_PATH=. exec ./harmony${DEV} $MODE -verbosity $VERBOSITY -bootnodes $BN_MA -ip $PUB_IP -port $NODE_PORT -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase -network_type="${network_type}" -dns_zone="${dns_zone}" -blacklist="${blacklist}" -min_peers="${minpeer}" -log_max_size=100
+LD_LIBRARY_PATH=. exec ./harmony${DEV} ${MODE} -verbosity ${VERBOSITY} -bootnodes "${BN_MA}" -ip ${PUB_IP} -port ${NODE_PORT} -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase -network_type="${network_type}" -dns_zone="${dns_zone}" -blacklist="${blacklist}" -min_peers="${minpeers}" -max_bls_keys_per_node="${max_bls_keys_per_node}" -shard_id="${SHARD_ID}" -log_max_size=100
