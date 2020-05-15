@@ -12,6 +12,7 @@
     - hmy.sh
     - hmy
     - tui
+    - bootnode
 
 - name: Install harmony libs
   copy:

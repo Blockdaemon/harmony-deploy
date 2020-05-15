@@ -18,11 +18,15 @@ if dd if=hmy count=1 bs=300 2>/dev/null | grep Error; then
    rm -f hmy
 fi
 
+echo "updating using node.sh"
 echo asdf | ./node.sh -S -1 -k asdf > /dev/null 2>&1
-chmod +x harmony
-if dd if=harmony count=1 bs=300 2>/dev/null | grep Error; then
-   rm harmony
-fi
+
+for i in bootnode harmony; do
+    chmod +x $i
+    if dd if=$i count=1 bs=300 2>/dev/null | grep Error; then
+       rm -f $i
+    fi
+done
 
 git -P diff harmony-checksums.txt
 
