@@ -71,13 +71,25 @@ function myip() {
 NODE_PORT=9000
 PUB_IP=
 
+# detect legacy single key
 # poorly emulate upstream node.sh
 pattern="UTC--*Z--bls_* *.key"
 shopt -s nullglob
 blsfiles=( $pattern )
 shopt -u nullglob
 BLSKEYFILE=${blsfiles[0]}
-msg "INFO: found ${BLSKEYFILE}"
+if [ ! -z "${BLSKEYFILE}" ]; then
+    msg "INFO: found single ${BLSKEYFILE}"
+    BLSKEY="-blskey_file ${BLSKEYFILE}"
+    if [ -r .passphrase ]; then
+	msg "INFO: found passphrase for ${BLSKEYFILE}"
+	BLSPASS="-blspass file:.passphrase"
+    fi
+elif [ -d "blskeys" ]; then
+    msg "INFO: found BLS folder"
+    BLSKEY="-blsfolder blskeys"
+    BLSPASS="-blspass file:/dev/null"
+fi
 
 myip
 
@@ -95,4 +107,10 @@ rm -rf .dht-* # NTL lets be rude
 #     -max_bls_keys_per_node="${max_bls_keys_per_node}"
 #     -verbosity="${log_level}"
 
-LD_LIBRARY_PATH=. exec ./harmony${DEV} ${MODE} -verbosity ${VERBOSITY} -bootnodes "${BN_MA}" -ip ${PUB_IP} -port ${NODE_PORT} -blskey_file "${BLSKEYFILE}" -blspass file:.passphrase -network_type="${network_type}" -dns_zone="${dns_zone}" -blacklist="${blacklist}" -min_peers="${minpeers}" -max_bls_keys_per_node="${max_bls_keys_per_node}" -shard_id="${SHARD_ID}" -log_max_size=100
+LD_LIBRARY_PATH=. exec ./harmony${DEV} ${MODE} -verbosity ${VERBOSITY} \
+    -bootnodes "${BN_MA}" -ip ${PUB_IP} -port ${NODE_PORT} \
+    ${BLSKEY} ${BLSPASS} \
+    -network_type="${network_type}" -dns_zone="${dns_zone}" \
+    -blacklist="${blacklist}" -min_peers="${minpeers}" \
+    -max_bls_keys_per_node="${max_bls_keys_per_node}" -shard_id="${SHARD_ID}" \
+    -log_max_size=100

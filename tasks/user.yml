@@ -1,40 +1,26 @@
 ---
-  - name: Make harmony home directory parent
-    file:
-      path: '{{ harmony_home.split("/")[0:-1]|join("/") }}'
-      state: directory
-      mode: '0755'
+- name: Make harmony home directory parent
+  file:
+    path: '{{ harmony_home.split("/")[0:-1]|join("/") }}'
+    state: directory
+    mode: '0755'
 
-  - name: Add harmony user
-    user:
-      name: "{{ harmony_user }}"
-      comment: Harmony Role Account
-      create_home: true
-      home: "{{ harmony_home }}"
-      shell: "/bin/bash"
-    ignore_errors: yes
+- name: Add harmony user
+  user:
+    name: "{{ harmony_user }}"
+    comment: Harmony Role Account
+    create_home: true
+    home: "{{ harmony_home }}"
+    shell: "/bin/bash"
+  ignore_errors: yes
 
-  - name: Make rclone config directory
-    file:
-      path: "{{ harmony_home }}/.config/rclone"
-      state: directory
-      mode: '0755'
-
-  - name: Configure rclone
-    copy:
-      src: "rclone.conf"
-      dest: "{{ harmony_home }}/.config/rclone/rclone.conf"
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-      mode: '0644'
-
-  - name: Make harmony staging directory
-    file:
-      path: "{{ harmony_home }}/staging"
-      state: directory
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-      mode: '0755'
+- name: Make harmony staging directory
+  file:
+    path: "{{ harmony_home }}/staging"
+    state: directory
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: '0755'
 
 # - name: Make harmony user keystore
 #   file:
@@ -54,25 +40,43 @@
 #   with_fileglob:
 #     - credentials/{{ ansible_hostname }}/keystore/*
 
-  - name: Send BLS
-    copy:
-      src: "{{ item }}"
-      dest: "{{ harmony_home }}/{{ item | basename }}"
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-      mode: '0600'
-    with_fileglob:
-      - credentials/{{ ansible_hostname }}/bls/UTC--*Z--bls_*
-      - credentials/{{ ansible_hostname }}/bls/*.key
+- block:
+  - name: Make multibls blskeys dir
+    file:
+      path: "{{ harmony_home }}/blskeys"
+      state: directory
+  - name: Enable multibls
+    set_fact:
+      blskeys: "blskeys/"
+  when: not is_legacy
+
+- name: Disable multibls
+  file:
+    path: "{{ harmony_home }}/blskeys"
+    state: absent
+  when: (is_legacy | bool)
+
+- name: Send BLS
+  copy:
+    src: "{{ item }}"
+    dest: "{{ harmony_home }}/{{ blskeys | default ('')}}{{ item | basename }}"
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: '0600'
+  with_fileglob:
+    - credentials/{{ ansible_hostname }}/bls/UTC--*Z--bls_*
+    - credentials/{{ ansible_hostname }}/bls/*.key
 
 # - set_fact:
 #     passphrase_file: "credentials/{{ ansible_hostname }}/bls/passphrase"
 
-  - name: Send BLS passphrase
-    copy:
-      #content: "{{ lookup('file',passphrase_file) | trim }}"
-      src: "credentials/{{ ansible_hostname }}/bls/passphrase"
-      dest: "{{ harmony_home }}/.passphrase"
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-      mode: '0600'
+- name: Send BLS passphrase
+  copy:
+    #content: "{{ lookup('file',passphrase_file) | trim }}"
+    src: "{{ item }}"
+    dest: "{{ harmony_home }}/.passphrase"
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: '0600'
+  with_fileglob:
+    - credentials/{{ ansible_hostname }}/bls/passphrase

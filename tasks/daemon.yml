@@ -4,6 +4,11 @@
     harmony_mode: "-node_type explorer -public_rpc"
   when: is_explorer
 
+- name: "***** STAKING *****"
+  set_fact:
+    harmony_mode: "-staking"
+  when: not (is_explorer or is_legacy)
+
 #- name: Make harmony logfile directory
 #  file:
 #    path: "/var/log/harmonyd"

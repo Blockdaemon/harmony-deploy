@@ -32,7 +32,7 @@
       backup: yes
     notify: "systemd reload"
 
-  - name: Install aptitude, dnsutils, and jq
+  - name: Install aptitude, dnsutils, jq, rclone, vim
     apt:
-      name: [ aptitude, dnsutils, jq, rclone ]
+      name: [ aptitude, dnsutils, jq, rclone, vim ]
       update_cache: yes
