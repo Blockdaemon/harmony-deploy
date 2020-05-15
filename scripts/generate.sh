@@ -1,5 +1,8 @@
 #!/bin/bash
 
+TOP=$(realpath $(dirname $0)/..)
+HMY=${TOP}/files/bin/hmy
+
 # Generate a given number of bls keys for a given shard
 version="0.0.1"
 script_name="generate.sh"
@@ -54,7 +57,8 @@ initialize() {
 }
 
 check_dependencies() {
-  if ! test -f hmy; then
+  if ! test -x ${HMY}; then
+    echo "can't execute ${HMY}"
     echo "You need hmy to be able to use this script, please install it:"
     echo "curl -LO https://harmony.one/hmycli && mv hmycli hmy && chmod u+x hmy"
     exit 1
@@ -88,12 +92,14 @@ generate_keys() {
   echo "Generating a total of ${count} BLS key(s) for shard ${shard} using node ${node}"
 
   while (( generated < count )); do
-    bls_key=$(./hmy keys generate-bls-key | jq '.["public-key"]' | tr -d '"')
-    generated_shard=$(./hmy --node ${node} utility shard-for-bls ${bls_key} | jq '.["shard-id"] | tonumber')
+    bls_key=$(${HMY} keys generate-bls-key | jq '.["public-key"]' | tr -d '"')
+    generated_shard=$(${HMY} --node ${node} utility shard-for-bls ${bls_key} | jq '.["shard-id"] | tonumber')
 
     if (( generated_shard == shard )); then
       keys+=("${bls_key}")
       ((generated++))
+      mkdir -p shard-${shard}/
+      mv ${bls_key}.key shard-${shard}/
     else
       rm -rf ${bls_key}.key
     fi
