@@ -45,7 +45,7 @@ initialize() {
   fi
 
   if [ -z "$node" ]; then
-    node="https://api.s0.os.hmny.io"
+    node="https://api.s0.t.hmny.io"
   fi
 
   unset generated
