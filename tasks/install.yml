@@ -8,23 +8,21 @@
     mode: preserve
   with_items:
     - node.sh
-    - wallet.sh
-    - wallet
     - mystatus.sh
     - hmy.sh
     - hmy
     - tui
 
-#- name: Install harmony libs
-#  copy:
-#    src: "{{ item }}"
-#    dest: "{{ harmony_home }}"
-#    owner: "{{ harmony_user }}"
-#    group: "{{ harmony_user }}"
-#    mode: preserve
-#  with_fileglob:
-#    - files/bin/lib*
-#  notify: harmony restart
+- name: Install harmony libs
+  copy:
+    src: "{{ item }}"
+    dest: "{{ harmony_home }}"
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: preserve
+  with_fileglob:
+    - files/bin/lib*
+# notify: harmony restart # harmony is statically linked now
 
 - name: Install harmony checksum file
   copy:

@@ -5,6 +5,7 @@
 /files/bin/harmony
 /files/bin/harmony-dev
 /files/bin/harmony-update.out
+/flies/bin/harmony_pubkey.pem
 /files/bin/latest
 /files/bin/libbls384_256.so
 /files/bin/libcrypto.so.10
@@ -14,7 +15,6 @@
 /files/bin/staging
 /files/bin/txgen
 /files/bin/tui
-/files/bin/wallet
 /hosts
 /credentials
 /clouds/local.env

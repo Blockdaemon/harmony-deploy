@@ -1,7 +1,7 @@
 #!/bin/bash
 pushd files/bin
 echo "getting wrappers"
-for i in node.sh wallet.sh tui; do
+for i in node.sh tui; do
   curl -SsLO https://harmony.one/$i
   chmod +x $i
 done
@@ -11,13 +11,6 @@ for i in go-sdk/master/scripts/hmy.sh harmony-ops/master/monitoring/mystatus.sh;
     chmod +x $(basename $i)
 done
 
-echo "updating wallet"
-sed -i -e 's/curl /curl -sS /' wallet.sh
-./wallet.sh -d > /dev/null # 2>&1
-if dd if=wallet count=1 bs=300 2>/dev/null | grep Error; then
-   rm -f wallet
-fi
-
 echo "updating hmy"
 sed -i -e 's/curl /curl -sS /' hmy.sh
 ./hmy.sh -d > /dev/null # 2>&1
@@ -26,7 +19,7 @@ if dd if=hmy count=1 bs=300 2>/dev/null | grep Error; then
 fi
 
 echo asdf | ./node.sh -S -1 -k asdf > /dev/null 2>&1
-chmod +x wallet harmony
+chmod +x harmony
 if dd if=harmony count=1 bs=300 2>/dev/null | grep Error; then
    rm harmony
 fi
