@@ -45,6 +45,8 @@
     file:
       path: "{{ harmony_home }}/blskeys"
       state: directory
+      owner: "{{ harmony_user }}"
+      group: "{{ harmony_user }}"
   - name: Enable multibls
     set_fact:
       blskeys: "blskeys/"
