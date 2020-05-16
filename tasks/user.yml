@@ -14,13 +14,16 @@
     shell: "/bin/bash"
   ignore_errors: yes
 
-- name: Make harmony staging directory
+- name: Make harmony staging and log directory
   file:
-    path: "{{ harmony_home }}/staging"
+    path: "{{ harmony_home }}/{{ item }}"
     state: directory
     owner: "{{ harmony_user }}"
     group: "{{ harmony_user }}"
     mode: '0755'
+  loop:
+    - staging
+    - latest
 
 - name: Send BLS keys
   copy:
