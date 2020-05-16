@@ -2,15 +2,16 @@
 
 Copy `hosts-example` to `hosts` and configure the remote hosts
 
-Install bls key to `credentials/<hostname>/bls`
+Install BLS key(s) to `credentials/<hostname>/bls/<pubkey>.key`
 
-Copy bls passphrase into `credentials/<hostname>/bls/passphrase`
+Multiple BLS keys are supported.
+
+BLS passphrases are not supported by this role at the moment.
 
 Secure credentials
 
 ```bash
 chmod og-rx -R credentials
-ansible-playbook main.yml
 ```
 
 ## Update binaries from upstream, push to hosts

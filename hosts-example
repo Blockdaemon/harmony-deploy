@@ -1,7 +1,14 @@
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
+harmony_home=/data/harmony
 
 [all]
 harmony0.example.com
 harmony1.example.com
 harmony-exp.example.com is_explorer=true shard_id=0
+
+[dev]
+harmony-dev.example.com
+
+[dev:vars]
+is_dev=true
