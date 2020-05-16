@@ -15,10 +15,18 @@ ansible-playbook main.yml
 
 ## Update binaries from upstream, push to hosts
 
+Note that this downloads binaries to your local machine, and the role installs
+those binaries.
+
 ```bash
 ./update.sh
 ansible-playbook main.yml
 ```
+
+**NOTE: DO NOT RUN THIS ROLE ON ANYTHING BUT A LINUX MACHINE**
+
+`./update.sh` downloads binaries native to where it is run, and on MacOS this
+means it downloads binaries that cannot be deployed to our nodes.
 
 **NOTE: If `BN_MA` changes in `node.sh`, update `files/sbin/harmonyd`**
 
