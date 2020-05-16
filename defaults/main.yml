@@ -1,6 +1,6 @@
 harmony_user: harmony
 harmony_home: /home/harmony
-harmony_mode: ""
+harmony_mode: "-staking"
 harmony_dev: ""
 
 wallet_home: /home/user
@@ -14,4 +14,3 @@ staging_checksum:
 
 is_explorer: false
 is_dev: false
-is_legacy: false

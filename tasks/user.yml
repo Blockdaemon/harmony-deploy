@@ -22,63 +22,13 @@
     group: "{{ harmony_user }}"
     mode: '0755'
 
-# - name: Make harmony user keystore
-#   file:
-#     path: "{{ harmony_home }}/.hmy/keystore/"
-#     state: directory
-#     owner: "{{ harmony_user }}"
-#     group: "{{ harmony_user }}"
-#     mode: '0755'
-
-# - name: Send keystore file(s)
-#   copy:
-#     src: "{{ item }}"
-#     dest: "{{ harmony_home }}/.hmy/keystore/"
-#     owner: "{{ harmony_user }}"
-#     group: "{{ harmony_user }}"
-#     mode: '0600'
-#   with_fileglob:
-#     - credentials/{{ ansible_hostname }}/keystore/*
-
-- block:
-  - name: Make multibls blskeys dir
-    file:
-      path: "{{ harmony_home }}/blskeys"
-      state: directory
-      owner: "{{ harmony_user }}"
-      group: "{{ harmony_user }}"
-  - name: Enable multibls
-    set_fact:
-      blskeys: "blskeys/"
-  when: not is_legacy
-
-- name: Disable multibls
-  file:
-    path: "{{ harmony_home }}/blskeys"
-    state: absent
-  when: (is_legacy | bool)
-
-- name: Send BLS
+- name: Send BLS keys
   copy:
-    src: "{{ item }}"
-    dest: "{{ harmony_home }}/{{ blskeys | default ('')}}{{ item | basename }}"
+    src: "credentials/{{ ansible_hostname }}/bls{{ item }}/"
+    dest: "{{ harmony_home }}/blskeys{{ item }}/"
     owner: "{{ harmony_user }}"
     group: "{{ harmony_user }}"
     mode: '0600'
-  with_fileglob:
-    - credentials/{{ ansible_hostname }}/bls/UTC--*Z--bls_*
-    - credentials/{{ ansible_hostname }}/bls/*.key
-
-# - set_fact:
-#     passphrase_file: "credentials/{{ ansible_hostname }}/bls/passphrase"
-
-- name: Send BLS passphrase
-  copy:
-    #content: "{{ lookup('file',passphrase_file) | trim }}"
-    src: "{{ item }}"
-    dest: "{{ harmony_home }}/.passphrase"
-    owner: "{{ harmony_user }}"
-    group: "{{ harmony_user }}"
-    mode: '0600'
-  with_fileglob:
-    - credentials/{{ ansible_hostname }}/bls/passphrase
+  loop:
+    - ""
+    - "-disabled"
