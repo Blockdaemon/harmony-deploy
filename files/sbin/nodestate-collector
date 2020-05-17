@@ -50,12 +50,12 @@ def get_hmy_block(num, url=None):
 #        return old
 #    return int(resp['result'], 0)
 
-def get_hmy_syncing(url=None, old=None):
+def get_hmy_status(url=None):
     resp = json_rpc(url, "hmyv2_syncing")
     if not 'result' in resp:
         print_err("syncing", resp)
-        return old
-    return resp['result']
+        return 'Error'
+    return 'Syncing' if resp['result'] else 'Synced'
 
 def get_hmy_metadata(url=None):
     resp = json_rpc(url, "hmy_getNodeMetadata")
@@ -87,12 +87,8 @@ class State:
         self.time = time.ctime(now)
         self.level = "info"
         self.version = ""
-        self.blskeys = ""
 
         self.peer_count = -1
-        self.syncing = True
-        self.epoch = -1
-        self.shard = -1
         self.id = ""
 
         self.block_number = -1
@@ -119,28 +115,31 @@ class State:
         self.time = time.ctime(now)
         self.level = 'info'
 
-        self.syncing = get_hmy_syncing(old=self.syncing)
-        self.status = "Syncing" if self.syncing else "Synced"
+        self.status = get_hmy_status()
         self.message = self.status
 
         meta = get_hmy_metadata()
+        #print(meta)
         version = meta['version'].split(',')[1].strip()
         self.version = version.split(' ')[1].strip()
 
         self.peer_count = meta['p2p-connectivity']['connected']
-        self.blskeys = ','.join(meta['blskey'])
-        self.epoch = meta['current-epoch']
-        self.shard = meta['chain-config']['chain-id']
-
         self.block_number = get_hmy_block_number(old=self.block_number)
 
-        if self.shard < 0:
+        self.harmony = {}
+        self.harmony['blskeys'] = ','.join(meta['blskey'])
+        self.harmony['epoch'] = meta['current-epoch']
+        shard = meta['shard-id']
+
+        if shard<0:
             print_err("Failed to find shard")
             return
 
-        self.id = f"shard-{self.shard}"
+        self.harmony['shard'] = shard
 
-        self.highest_block_number = get_hmy_highest_block_number(self.shard, old=self.highest_block_number)
+        self.id = f"shard-{shard}"
+
+        self.highest_block_number = get_hmy_highest_block_number(shard, old=self.highest_block_number)
         if self.highest_block_number > 0:
             self.blocks_behind = self.highest_block_number - self.block_number
         if self.blocks_behind > 100:
