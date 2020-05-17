@@ -1,0 +1,17 @@
+# copy to /etc/systemd/system/
+[Unit]
+Description=Harmony nodestate collector
+After=harmony.service
+
+[Service]
+User={{ harmony_user }}
+Group={{ harmony_user }}
+Environment="COLLECTOR_LOG={{ nodestate_log }}"
+Environment="COLLECTOR_PERIOD={{ nodestate_period }}"
+WorkingDirectory={{ nodestate_home }}
+ExecStart=/usr/local/sbin/nodestate-collector
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

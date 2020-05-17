@@ -1,0 +1,177 @@
+#!/usr/bin/env python3
+
+import os, sys, time
+import traceback
+import re, json, subprocess, requests
+
+#from dateutil import parser
+
+def print_err(*args):
+    print(args, file=sys.stderr, flush=True)
+
+## JSON-RPC
+def json_rpc(url, method, params=[]):
+    if url == None:
+        url = os.getenv("HMY_URL", "http://localhost:9500/")
+
+    headers = {'Content-Type':'application/json'}
+    req = {"jsonrpc":"2.0","method":method,"params":params,"id":1337}
+    resp = requests.post(url, data=json.dumps(req), headers=headers)
+    if resp.status_code != 200 or len(resp.content) == 0:
+        print_err(f"{method} failed: {resp.status_code}: {resp.content.decode()}")
+        return []
+    return resp.json()
+
+def get_hmy_block_number(url=None, old=None):
+    resp = json_rpc(url, "hmyv2_blockNumber")
+    if not 'result' in resp:
+        print_err("blockNumber", resp)
+        return old
+    return resp['result']
+
+def get_hmy_tx(tx, url=None):
+    resp = json_rpc(url, "hmyv2_getTransactionByHash", params=[tx])
+    if not 'result' in resp:
+        print_err(f"getTransactionByHash({tx})", resp)
+        return None
+    return resp['result']
+
+def get_hmy_block(num, url=None):
+    resp = json_rpc(url, "hmyv2_getBlockByNumber", params=[num, {"fullTx":True,"inclTx":True,"InclStaking":True}])
+    if not 'result' in resp:
+        print_err(f"getBlockByNumber({num})", resp)
+        return None
+    return resp['result']
+
+def get_hmy_peer_count(url=None, old=None):
+    resp = json_rpc(url, "net_peerCount")
+    if not 'result' in resp:
+        print_err("net_peerCount", resp)
+        return old
+    return int(resp['result'], 0)
+
+def get_hmy_syncing(url=None, old=None):
+    resp = json_rpc(url, "hmyv2_syncing")
+    if not 'result' in resp:
+        print_err("syncing", resp)
+        return old
+    return resp['result']
+
+def get_hmy_shard(url=None, old=None):
+    #resp = json_rpc(url, "hmyv2_getShardingStructure")
+    resp = json_rpc(url, "hmyv2_latestHeader")
+    if not 'result' in resp:
+        print_err("latestHeader", resp)
+        return old
+    return resp['result']['shardID']
+
+def get_hmy_epoch(url=None, old=None):
+    resp = json_rpc(url, "hmyv2_getEpoch")
+    if not 'result' in resp:
+        print_err("getEpoch", resp)
+        return old
+    return resp['result']
+
+# FIXME: use centralized external ref
+def get_hmy_highest_block_number(shard, old=None):
+    return get_hmy_block_number(url=f"https://api.s{shard}.t.hmny.io/", old=old)
+
+class State:
+    def __init__(self):
+        now = time.time()
+        self.time = time.ctime(now)
+        self.level = "info"
+
+        #spawn hmy -version
+        #self.version = ""
+        # spawn some bls crap
+        #self.blskeys = ""
+
+        self.peer_count = -1
+        self.syncing = True
+        self.shard = -1
+        self.epoch = -1
+
+        self.block_number = -1
+        self.highest_block_number = -1
+        self.blocks_behind = 0
+        self.latest_hash = ''
+        self.latest_block_time = ''
+        self.status = "Offline"
+        self.message = ""
+        self.update()
+
+    def update(self):
+        try:
+            self.unsafe_update()
+        except:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback.print_exception(exc_type, exc_value, exc_traceback, limit=4, file=sys.stderr)
+            sys.stderr.flush()
+            self.message = f"{exc_type}: {exc_value}"
+            self.bump_level('fatal')
+
+    def unsafe_update(self):
+        now = time.time()
+        self.time = time.ctime(now)
+        self.level = 'info'
+
+        self.peer_count = get_hmy_peer_count(old=self.peer_count)
+        self.syncing = get_hmy_syncing(old=self.syncing)
+        self.status = "Syncing" if self.syncing else "Synced"
+        self.shard = get_hmy_shard(old=self.shard)
+        self.epoch = get_hmy_epoch(old=self.epoch)
+
+        self.block_number = get_hmy_block_number(old=self.block_number)
+
+        if self.shard < 0:
+            print_err("Failed to find shard")
+            return
+
+        self.highest_block_number = get_hmy_highest_block_number(self.shard, old=self.highest_block_number)
+        if self.highest_block_number > 0:
+            self.blocks_behind = self.highest_block_number - self.block_number
+        if self.blocks_behind > 100:
+            self.bump_level('error')
+        elif self.blocks_behind > 10:
+            self.bump_level('warn')
+
+        latest_block = get_hmy_block(self.block_number)
+        if latest_block!=None and 'hash' in latest_block:
+            self.latest_hash = latest_block['hash']
+            self.latest_block_time = time.ctime(latest_block['timestamp'])
+        else:
+            print_err("Failed to find latest block")
+
+    def __str__(self):
+        return json.dumps(self.__dict__)
+
+    def bump_level(self, level):
+        Levels = {'info': 0, 'warn': 1, 'error': 2, 'fatal': 3}
+        if Levels[level]>Levels[self.level]:
+            self.level = level
+
+def main():
+    output = os.getenv("COLLECTOR_LOG", None)
+    period = int(os.getenv("COLLECTOR_PERIOD", 0))
+
+    state = State()
+
+    while True:
+        if output == None:
+            print(state)
+        else:
+            with open(output, "a") as myfile:
+                myfile.write(str(state)+"\n")
+                myfile.close()
+
+        if period <= 0:
+            break;
+
+        time.sleep(period)
+        state.update()
+
+if __name__ == "__main__":
+    main()
+
+# vim: expandtab

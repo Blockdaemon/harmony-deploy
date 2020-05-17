@@ -3,7 +3,10 @@ harmony_home: /home/harmony
 harmony_mode: "-staking"
 harmony_dev: ""
 
-wallet_home: /home/user
+nodestate_home: /data/nodestate
+nodestate_log: "{{ nodestate_home }}/nodestate.log"
+nodestate_period: 30
+
 dev_bindir: "{{ lookup('env','HOME') }}/src/harmony-one/harmony/bin"
 dev_suffix: dev
 
