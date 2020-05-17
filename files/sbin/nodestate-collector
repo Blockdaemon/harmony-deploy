@@ -79,7 +79,7 @@ def get_hmy_highest_block_number(shard, old=None):
 
 def get_version():
     home = os.getenv("HARMONY_HOME", "/data/harmony")
-    cmd = f"{home}/harmony -version 2>&1"
+    cmd = f"{home}/harmony -version 2>&1 | cut -f 6 -d ' '"
     return subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
 
 class State:
