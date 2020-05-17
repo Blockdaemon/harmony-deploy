@@ -76,14 +76,20 @@ def get_hmy_epoch(url=None, old=None):
 def get_hmy_highest_block_number(shard, old=None):
     return get_hmy_block_number(url=f"https://api.s{shard}.t.hmny.io/", old=old)
 
+
+def get_version():
+    home = os.getenv("HARMONY_HOME", "/data/harmony")
+    cmd = f"{home}/harmony -version 2>&1"
+    return subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
+
 class State:
     def __init__(self):
         now = time.time()
         self.time = time.ctime(now)
         self.level = "info"
 
-        #spawn hmy -version
-        #self.version = ""
+        self.version = get_version()
+
         # spawn some bls crap
         #self.blskeys = ""
 
@@ -98,7 +104,7 @@ class State:
         self.latest_hash = ''
         self.latest_block_time = ''
         self.status = "Offline"
-        self.message = ""
+        self.message = "Offline"
         self.update()
 
     def update(self):
@@ -119,6 +125,7 @@ class State:
         self.peer_count = get_hmy_peer_count(old=self.peer_count)
         self.syncing = get_hmy_syncing(old=self.syncing)
         self.status = "Syncing" if self.syncing else "Synced"
+        self.message = self.status
         self.shard = get_hmy_shard(old=self.shard)
         self.epoch = get_hmy_epoch(old=self.epoch)
 

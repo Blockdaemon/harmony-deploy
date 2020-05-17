@@ -23,3 +23,9 @@
     state: restarted
   listen: "harmony restart"
   tags: staging
+
+- name: Restart harmony nodestate collector
+  systemd:
+    name: nodestate-collector
+    state: restarted
+  listen: "nodestate-collector restart"

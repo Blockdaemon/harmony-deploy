@@ -15,4 +15,6 @@
     dest: "{{ dname }}"
     remote_src: true
     mode: preserve
-  notify: harmony restart
+  notify:
+  - harmony restart
+  - nodestate-collector restart

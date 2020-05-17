@@ -8,6 +8,7 @@ User={{ harmony_user }}
 Group={{ harmony_user }}
 Environment="COLLECTOR_LOG={{ nodestate_log }}"
 Environment="COLLECTOR_PERIOD={{ nodestate_period }}"
+Environment="HARMONY_HOME={{ harmony_home }}"
 WorkingDirectory={{ nodestate_home }}
 ExecStart=/usr/local/sbin/nodestate-collector
 Restart=always
