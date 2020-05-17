@@ -96,6 +96,7 @@ class State:
         self.peer_count = -1
         self.syncing = True
         self.shard = -1
+        self.id = ""
         self.epoch = -1
 
         self.block_number = -1
@@ -134,6 +135,8 @@ class State:
         if self.shard < 0:
             print_err("Failed to find shard")
             return
+
+        self.id = f"shard-{self.shard}"
 
         self.highest_block_number = get_hmy_highest_block_number(self.shard, old=self.highest_block_number)
         if self.highest_block_number > 0:
