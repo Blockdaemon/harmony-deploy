@@ -43,12 +43,12 @@ def get_hmy_block(num, url=None):
         return None
     return resp['result']
 
-def get_hmy_peer_count(url=None, old=None):
-    resp = json_rpc(url, "net_peerCount")
-    if not 'result' in resp:
-        print_err("net_peerCount", resp)
-        return old
-    return int(resp['result'], 0)
+#def get_hmy_peer_count(url=None, old=None):
+#    resp = json_rpc(url, "net_peerCount")
+#    if not 'result' in resp:
+#        print_err("net_peerCount", resp)
+#        return old
+#    return int(resp['result'], 0)
 
 def get_hmy_syncing(url=None, old=None):
     resp = json_rpc(url, "hmyv2_syncing")
@@ -57,47 +57,43 @@ def get_hmy_syncing(url=None, old=None):
         return old
     return resp['result']
 
-def get_hmy_shard(url=None, old=None):
-    #resp = json_rpc(url, "hmyv2_getShardingStructure")
-    resp = json_rpc(url, "hmyv2_latestHeader")
+def get_hmy_metadata(url=None):
+    resp = json_rpc(url, "hmy_getNodeMetadata")
     if not 'result' in resp:
-        print_err("latestHeader", resp)
-        return old
-    return resp['result']['shardID']
-
-def get_hmy_epoch(url=None, old=None):
-    resp = json_rpc(url, "hmyv2_getEpoch")
-    if not 'result' in resp:
-        print_err("getEpoch", resp)
-        return old
+        print_err("getNodeMetadata", resp)
+        return
     return resp['result']
+
+#def get_hmy_epoch(url=None, old=None):
+#    resp = json_rpc(url, "hmyv2_getEpoch")
+#    if not 'result' in resp:
+#        print_err("getEpoch", resp)
+#        return old
+#    return resp['result']
 
 # FIXME: use centralized external ref
 def get_hmy_highest_block_number(shard, old=None):
     return get_hmy_block_number(url=f"https://api.s{shard}.t.hmny.io/", old=old)
 
 
-def get_version():
-    home = os.getenv("HARMONY_HOME", "/data/harmony")
-    cmd = f"{home}/harmony -version 2>&1 | cut -f 6 -d ' '"
-    return subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
+#def get_version():
+#    home = os.getenv("HARMONY_HOME", "/data/harmony")
+#    cmd = f"{home}/harmony -version 2>&1 | cut -f 6 -d ' '"
+#    return subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
 
 class State:
     def __init__(self):
         now = time.time()
         self.time = time.ctime(now)
         self.level = "info"
-
-        self.version = get_version()
-
-        # spawn some bls crap
-        #self.blskeys = ""
+        self.version = ""
+        self.blskeys = ""
 
         self.peer_count = -1
         self.syncing = True
+        self.epoch = -1
         self.shard = -1
         self.id = ""
-        self.epoch = -1
 
         self.block_number = -1
         self.highest_block_number = -1
@@ -123,12 +119,18 @@ class State:
         self.time = time.ctime(now)
         self.level = 'info'
 
-        self.peer_count = get_hmy_peer_count(old=self.peer_count)
         self.syncing = get_hmy_syncing(old=self.syncing)
         self.status = "Syncing" if self.syncing else "Synced"
         self.message = self.status
-        self.shard = get_hmy_shard(old=self.shard)
-        self.epoch = get_hmy_epoch(old=self.epoch)
+
+        meta = get_hmy_metadata()
+        version = meta['version'].split(',')[1].strip()
+        self.version = version.split(' ')[1].strip()
+
+        self.peer_count = meta['p2p-connectivity']['connected']
+        self.blskeys = ','.join(meta['blskey'])
+        self.epoch = meta['current-epoch']
+        self.shard = meta['chain-config']['chain-id']
 
         self.block_number = get_hmy_block_number(old=self.block_number)
 
