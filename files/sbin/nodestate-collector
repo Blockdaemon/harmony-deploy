@@ -185,6 +185,12 @@ class State:
             for i in 'current-epoch-performance', 'total-delegation', 'currently-in-committee', 'epos-status', 'booted-status', 'lifetime':
                 if i in v:
                     self.harmony['validator'][i] = v[i]
+            if 'lifetime' in v:
+                blocks = v['lifetime']['blocks']
+                missed = blocks['to-sign'] - blocks['signed']
+                if 'missed' in self.harmony:
+                    self.harmony['newly-missed'] = missed - self.harmony['missed']
+                self.harmony['missed'] = missed
 
     def get_my_v_info(self):
         # only do this once, it is expensive
