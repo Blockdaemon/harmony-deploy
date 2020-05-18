@@ -75,6 +75,11 @@ def get_hmy_metadata(url=None):
 def get_hmy_highest_block_number(shard, old=None):
     return get_hmy_block_number(url=f"https://api.s{shard}.t.hmny.io/", old=old)
 
+# FIXME: use centralized external ref
+def get_hmy_latest_version(shard=0):
+    meta = get_hmy_metadata(f"https://api.s{shard}.t.hmny.io/")
+    version = meta['version'].split(',')[1].strip()
+    return version.split(' ')[1].strip()
 
 #def get_version():
 #    home = os.getenv("HARMONY_HOME", "/data/harmony")
@@ -98,6 +103,8 @@ class State:
         self.latest_block_time = ''
         self.status = "Offline"
         self.message = "Offline"
+
+        self.harmony = {}
         self.update()
 
     def update(self):
@@ -126,18 +133,17 @@ class State:
         self.peer_count = meta['p2p-connectivity']['connected']
         self.block_number = get_hmy_block_number(old=self.block_number)
 
-        self.harmony = {}
         self.harmony['blskeys'] = ','.join(meta['blskey'])
         self.harmony['epoch'] = meta['current-epoch']
         shard = meta['shard-id']
-
         if shard<0:
             print_err("Failed to find shard")
             return
-
         self.harmony['shard'] = shard
 
         self.id = f"shard-{shard}"
+        self.latest_version = get_hmy_latest_version(shard)
+        self.needs_update = self.version != self.latest_version
 
         self.highest_block_number = get_hmy_highest_block_number(shard, old=self.highest_block_number)
         if self.highest_block_number > 0:
