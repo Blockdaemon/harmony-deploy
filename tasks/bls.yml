@@ -1,0 +1,53 @@
+---
+- name: Get list of available keys
+  set_fact:
+    keys: "{{ (keys | default([])) + [item | basename] }}"
+  with_fileglob:
+  - "credentials/{{ ansible_hostname }}/bls/*.key"
+
+- name: Determine desired active keys
+  set_fact:
+    active_keys: "{{ (keys | sort)[:num_bls] }}"
+  when: keys is defined and (keys | length)>=num_bls
+
+- name: Send available BLS keys
+  copy:
+    src: "credentials/{{ ansible_hostname }}/bls/"
+    dest: "{{ harmony_home }}/blskeys-available/"
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: '0600'
+
+- name: Get list of current active keys
+  find:
+    paths: "{{ harmony_home }}/blskeys/"
+    recurse: no
+    file_type: link
+    patterns: "*.key"
+  register: current_keys
+- name: Extract basenames of current active keys
+  set_fact:
+    current_keys: "{{ current_keys.files | map(attribute='path') | map('basename') | list | sort }}"
+
+- block:
+  - name: Empty active blskeys directory
+    file:
+      state: "{{ item }}"
+      dest: "{{ harmony_home }}/blskeys/"
+      owner: "{{ harmony_user }}"
+      group: "{{ harmony_user }}"
+      mode: '0755'
+    loop:
+    - absent
+    - directory
+  - name: Populate active blskeys directory
+    file:
+      src: "../blskeys-available/{{ item }}"
+      dest: "{{ harmony_home }}/blskeys/{{ item }}"
+      owner: "{{ harmony_user }}"
+      group: "{{ harmony_user }}"
+      state: link
+      #force: yes
+    loop: "{{ active_keys }}"
+    notify: "harmony restart"
+  when: active_keys is defined and (active_keys | length)>0 and active_keys != current_keys

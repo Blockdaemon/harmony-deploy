@@ -6,6 +6,10 @@ Install BLS key(s) to `credentials/<hostname>/bls/<pubkey>.key`
 
 Multiple BLS keys are supported.
 
+*Note that changing `num_bls` is not enough, you have to add/remove the
+appropriate BLS keys on chain using `hmy staking edit-validator` with
+`--remove-bls-key` and `--add-bls-key` to match what is on the node.*
+
 BLS passphrases are not supported by this role at the moment.
 
 Secure credentials

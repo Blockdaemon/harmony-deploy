@@ -24,6 +24,9 @@
   when: dev_bin.stat.exists and is_dev
   tags: dev
 
+- import_tasks: bls.yml
+  tags: bls
+
 - import_tasks: daemon.yml
   tags: [daemon, dev]
 

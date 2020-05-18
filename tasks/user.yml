@@ -24,14 +24,3 @@
   loop:
     - staging
     - latest
-
-- name: Send BLS keys
-  copy:
-    src: "credentials/{{ ansible_hostname }}/bls{{ item }}/"
-    dest: "{{ harmony_home }}/blskeys{{ item }}/"
-    owner: "{{ harmony_user }}"
-    group: "{{ harmony_user }}"
-    mode: '0600'
-  loop:
-    - ""
-    - "-disabled"

@@ -4,7 +4,7 @@ harmony_home=/data/harmony
 
 [all]
 harmony0.example.com
-harmony1.example.com
+harmony1.example.com num_bls=4
 harmony-exp.example.com is_explorer=true shard_id=0
 
 [dev]
