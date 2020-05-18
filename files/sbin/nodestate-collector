@@ -71,6 +71,26 @@ def get_hmy_metadata(url=None):
 #        return old
 #    return resp['result']
 
+# FIXME: use centralized external ref? This is way out of scope for blockheight so not sure.
+# needs to query a node on shard 0
+# FIXME: also if our shard is 0 we can query our own node
+def get_hmy_validator_info(validator, url="https://api.s0.t.hmny.io/"):
+    resp = json_rpc(url, "hmyv2_getValidatorInformation", params=[validator])
+    if not 'result' in resp:
+        print_err("getValidatorInformation", resp)
+        return
+    return resp['result']
+
+# FIXME: use centralized external ref? This is way out of scope for blockheight so not sure.
+# needs to query a node on shard 0
+# FIXME: also if our shard is 0 we can query our own node
+def get_hmy_all_validator_info(url="https://api.s0.t.hmny.io/"):
+    resp = json_rpc(url, "hmyv2_getAllValidatorInformation", params=[-1])
+    if not 'result' in resp:
+        print_err("getAllValidatorInformation", resp)
+        return
+    return resp['result']
+
 # FIXME: use centralized external ref
 def get_hmy_highest_block_number(shard, old=None):
     return get_hmy_block_number(url=f"https://api.s{shard}.t.hmny.io/", old=old)
@@ -159,6 +179,33 @@ class State:
             self.latest_block_time = time.ctime(latest_block['timestamp'])
         else:
             print_err("Failed to find latest block")
+
+        v = self.get_my_v_info()
+        if v:
+            for i in 'current-epoch-performance', 'total-delegation', 'currently-in-committee', 'epos-status', 'booted-status', 'lifetime':
+                if i in v:
+                    self.harmony['validator'][i] = v[i]
+
+    def get_my_v_info(self):
+        # only do this once, it is expensive
+        if 'validator' not in self.harmony:
+            if 'blskeys' not in self.harmony:
+                return
+
+            # find our first blskey in the list of all validators
+            bls = self.harmony['blskeys'].split(',')[0]
+            all_v = get_hmy_all_validator_info()
+            if not all_v:
+                return
+
+            match = [v for v in all_v if bls in v['validator']['bls-public-keys']]
+            if len(match) != 1 or 'validator' not in match[0]:
+                return
+            self.harmony['validator'] = {}
+            self.harmony['validator']['address'] = match[0]['validator']['address']
+            return match[0]
+        else:
+            return get_hmy_validator_info(self.harmony['validator']['address'])
 
     def __str__(self):
         return json.dumps(self.__dict__)
