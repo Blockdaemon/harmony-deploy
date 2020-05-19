@@ -111,16 +111,16 @@ class State:
         now = time.time()
         self.time = time.ctime(now)
         self.level = "info"
-        self.version = ""
+        self.version = None
 
-        self.peer_count = -1
-        self.id = ""
+        self.peer_count = 0
+        self.id = None
 
-        self.block_number = -1
-        self.highest_block_number = -1
-        self.blocks_behind = 0
-        self.latest_hash = ''
-        self.latest_block_time = ''
+        self.block_number = None
+        self.highest_block_number = None
+        self.blocks_behind = None
+        self.latest_hash = None
+        self.latest_block_time = None
         self.status = "Offline"
         self.message = "Offline"
 
@@ -136,6 +136,10 @@ class State:
             sys.stderr.flush()
             self.message = f"{exc_type}: {exc_value}"
             self.bump_level('fatal')
+
+        # clean up self
+        for i in [k for k,v in vars(self).items() if v==None]:
+            delattr(self, i)
 
     def unsafe_update(self):
         now = time.time()
@@ -185,12 +189,23 @@ class State:
             for i in 'current-epoch-performance', 'total-delegation', 'currently-in-committee', 'epos-status', 'booted-status', 'lifetime':
                 if i in v:
                     self.harmony['validator'][i] = v[i]
+            if 'current-epoch-performance' in v:
+                current = v['current-epoch-performance']['current-epoch-signing-percent']
+                signed = float(current['current-epoch-signed'])
+                to_sign = current['current-epoch-to-sign']
+                # make a string so we don't have logstash int/float confusion
+                # Mark it none if we don't have it so it is cleaned up below.
+                self.harmony['signing-percent'] = None if to_sign == 0 else str(round(signed/to_sign*100, 2))
             if 'lifetime' in v:
                 blocks = v['lifetime']['blocks']
                 missed = blocks['to-sign'] - blocks['signed']
                 if 'missed' in self.harmony:
                     self.harmony['newly-missed'] = missed - self.harmony['missed']
                 self.harmony['missed'] = missed
+
+        # clean up harmony
+        for i in [k for k,vv in self.harmony.items() if vv==None]:
+            del self.harmony[i]
 
     def get_my_v_info(self):
         # only do this once, it is expensive
@@ -209,16 +224,22 @@ class State:
                 return
             self.harmony['validator'] = {}
             self.harmony['validator']['address'] = match[0]['validator']['address']
-            return match[0]
+            ret = match[0]
         else:
-            return get_hmy_validator_info(self.harmony['validator']['address'])
+            ret = get_hmy_validator_info(self.harmony['validator']['address'])
+
+        # clean up ret
+        for i in [k for k,v in ret.items() if v==None]:
+            del ret[i]
+
+        return ret
 
     def __str__(self):
         return json.dumps(self.__dict__)
 
     def bump_level(self, level):
         Levels = {'info': 0, 'warn': 1, 'error': 2, 'fatal': 3}
-        if Levels[level]>Levels[self.level]:
+        if self.level == None or Levels[level]>Levels[self.level]:
             self.level = level
 
 def main():
