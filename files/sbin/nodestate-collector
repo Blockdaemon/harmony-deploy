@@ -186,13 +186,11 @@ class State:
 
         v = self.get_my_v_info()
         if v:
-            for i in 'current-epoch-performance', 'currently-in-committee', 'epos-status', 'booted-status', 'lifetime':
+            for i in 'current-epoch-performance', 'currently-in-committee', 'epos-status', 'booted-status':
                 if i in v:
                     self.harmony['validator'][i] = v[i]
-            #if 'total-delegation' in v:
-            #   # don't use native total delegation, its too big. Move out of 'validator' and just make
-            #   # it a separate float
-            #   self.harmony['total-delegation'] = float(v['total-delegation'])
+            if 'total-delegation' in v:
+                self.harmony['validator']['total-delegation'] = v['total-delegation']/1.0E18
             if 'current-epoch-performance' in v:
                 current = v['current-epoch-performance']['current-epoch-signing-percent']
                 signed = float(current['current-epoch-signed'])
@@ -201,6 +199,10 @@ class State:
                 # Mark it none if we don't have it so it is cleaned up below.
                 self.harmony['signing-percent'] = None if to_sign == 0 else str(round(signed/to_sign*100, 2))
             if 'lifetime' in v:
+                l = v['lifetime']
+                if 'reward-accumulated' in l:
+                    l['reward-accumulated'] = l['reward-accumulated']/1.0E18
+                self.harmony['validator']['lifetime'] = l
                 blocks = v['lifetime']['blocks']
                 missed = blocks['to-sign'] - blocks['signed']
                 if 'missed' in self.harmony:
