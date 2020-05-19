@@ -116,7 +116,7 @@ class State:
         self.peer_count = 0
         self.id = None
 
-        self.block_number = None
+        self.block_number = 0
         self.highest_block_number = None
         self.blocks_behind = None
         self.latest_hash = None
