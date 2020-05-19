@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# Force OS download to Linux
+OS=Linux
+
 pushd files/bin
 echo "getting wrappers"
 for i in node.sh tui; do
@@ -12,19 +16,24 @@ for i in go-sdk/master/scripts/hmy.sh harmony-ops/master/monitoring/mystatus.sh;
 done
 
 echo "updating hmy"
-sed -i -e 's/curl /curl -sS /' hmy.sh
-./hmy.sh -d > /dev/null # 2>&1
+sed -e "s/curl /curl -sS /;s/uname -s/echo $OS/" hmy.sh > hmy-linux.sh
+bash ./hmy-linux.sh -d
 if dd if=hmy count=1 bs=300 2>/dev/null | grep Error; then
+   echo "hmy download failed"
    rm -f hmy
+   exit 1
 fi
 
 echo "updating using node.sh"
-echo asdf | ./node.sh -S -1 -k asdf > /dev/null 2>&1
+sed -e 's/uname -s/echo Linux/' node.sh > node-linux.sh
+echo asdf | bash ./node-linux.sh -S -1 -k asdf > /dev/null 2>&1
 
 for i in bootnode harmony; do
     chmod +x $i
     if dd if=$i count=1 bs=300 2>/dev/null | grep Error; then
+       echo "$i download failed"
        rm -f $i
+       exit 1
     fi
 done
 

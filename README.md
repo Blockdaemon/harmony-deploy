@@ -28,8 +28,6 @@ those binaries.
 ansible-playbook main.yml
 ```
 
-**NOTE: DO NOT RUN THIS ROLE ON ANYTHING BUT A LINUX MACHINE**
-
 `./update.sh` downloads binaries native to where it is run, and on MacOS this
 means it downloads binaries that cannot be deployed to our nodes.
 
