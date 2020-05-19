@@ -186,9 +186,13 @@ class State:
 
         v = self.get_my_v_info()
         if v:
-            for i in 'current-epoch-performance', 'total-delegation', 'currently-in-committee', 'epos-status', 'booted-status', 'lifetime':
+            for i in 'current-epoch-performance', 'currently-in-committee', 'epos-status', 'booted-status', 'lifetime':
                 if i in v:
                     self.harmony['validator'][i] = v[i]
+            #if 'total-delegation' in v:
+            #   # don't use native total delegation, its too big. Move out of 'validator' and just make
+            #   # it a separate float
+            #   self.harmony['total-delegation'] = float(v['total-delegation'])
             if 'current-epoch-performance' in v:
                 current = v['current-epoch-performance']['current-epoch-signing-percent']
                 signed = float(current['current-epoch-signed'])
