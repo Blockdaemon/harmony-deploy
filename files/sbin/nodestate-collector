@@ -197,13 +197,14 @@ class State:
                 to_sign = current['current-epoch-to-sign']
                 if to_sign == 0:
                     # Mark it none if we don't have it so it is cleaned up below.
-                    self.harmony['signing-percent'] = None
+                    self.harmony['current-epoch-signing-percent'] = None
                 else:
-                    self.harmony['signing-percent'] = {}
-                    # make a string so we don't have logstash int/float confusion
-                    self.harmony['signing-percent']['str'] = str(round(signed/to_sign*100, 2))
-                    # make a pct field so we can fix a type with an ES template
-                    self.harmony['signing-percent']['pct'] = signed/to_sign
+                    self.harmony['current-epoch-signing-percent'] = {
+                        # make a string so we don't have logstash int/float confusion
+                        'str': str(round(signed/to_sign*100, 2)),
+                        # make a pct field so we can fix a type with an ES template
+                        'pct': signed/to_sign
+                    }
             if 'lifetime' in v:
                 l = v['lifetime']
                 if 'reward-accumulated' in l:
