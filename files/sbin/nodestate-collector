@@ -199,6 +199,10 @@ class State:
                     # Mark it none if we don't have it so it is cleaned up below.
                     self.harmony['current-epoch-signing-percent'] = None
                 else:
+                    missed = to_sign-signed
+                    if 'missed' in self.harmony:
+                        self.harmony['newly-missed'] = missed - self.harmony['missed']
+                    self.harmony['missed'] = missed
                     self.harmony['current-epoch-signing-percent'] = {
                         # make a string so we don't have logstash int/float confusion
                         'str': str(round(signed/to_sign*100, 2)),
@@ -211,10 +215,10 @@ class State:
                     l['reward-accumulated'] = l['reward-accumulated']/1.0E18
                 self.harmony['validator']['lifetime'] = l
                 blocks = v['lifetime']['blocks']
-                missed = blocks['to-sign'] - blocks['signed']
-                if 'missed' in self.harmony:
-                    self.harmony['newly-missed'] = missed - self.harmony['missed']
-                self.harmony['missed'] = missed
+#               missed = blocks['to-sign'] - blocks['signed']
+#               if 'lifetime-missed' in self.harmony:
+#                   self.harmony['liftime-newly-missed'] = missed - self.harmony['liftime-missed']
+#               self.harmony['liftime-missed'] = missed
 
         # clean up harmony
         for i in [k for k,vv in self.harmony.items() if vv==None]:
