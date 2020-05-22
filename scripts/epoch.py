@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 
 import os
-#import sys
 import time
-#import traceback
-#import re
 import json, requests
-
-#from dateutil import parser
 
 def print_err(*args):
     print(args, file=sys.stderr, flush=True)
