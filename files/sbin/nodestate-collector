@@ -7,7 +7,7 @@ import re, json, subprocess, requests
 #from dateutil import parser
 
 def print_err(*args):
-    print(args, file=sys.stderr, flush=True)
+    print(*args, file=sys.stderr, flush=True)
 
 ## JSON-RPC
 def json_rpc(url, method, params=[]):

@@ -5,7 +5,7 @@ import time
 import json, requests
 
 def print_err(*args):
-    print(args, file=sys.stderr, flush=True)
+    print(*args, file=sys.stderr, flush=True)
 
 def timer(elapsed):
     (days, rem) = divmod(elapsed, 24*60*60)
