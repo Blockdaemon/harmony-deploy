@@ -1,2 +1,7 @@
 #!/bin/bash
-hmy -n https://api.s0.t.hmny.io blockchain median-stake | jq -cr '[.result["epos-slot-candidates"][] | {"s": .["stake-per-key"], "v": .validator, "k": .["keys-at-auction"][]}] | sort_by(.s) | reverse | to_entries | map([(.key + 1), .value.v]) | .[]'
+
+if [ $# -gt 0 -a -r "$1" ]; then
+    regex=$(tr '\n' ' ' < $1 | sed 's/ $//' | sed 's/ /\\|/g')
+fi
+
+hmy -n https://api.s0.t.hmny.io blockchain median-stake | jq -cr -f auction.js | grep "$regex"
