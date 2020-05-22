@@ -200,8 +200,11 @@ class State:
                     self.harmony['current-epoch-signing-percent'] = None
                 else:
                     missed = to_sign-signed
-                    if 'missed' in self.harmony:
+                    if 'missed' in self.harmony and missed >= self.harmony['missed']:
                         self.harmony['newly-missed'] = missed - self.harmony['missed']
+                    else:
+                        # Mark it none if we don't have it so it is cleaned up below.
+                        self.harmony['newly-missed'] = None
                     self.harmony['missed'] = missed
                     self.harmony['current-epoch-signing-percent'] = {
                         # make a string so we don't have logstash int/float confusion
