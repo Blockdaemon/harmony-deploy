@@ -49,5 +49,7 @@
       state: link
       #force: yes
     loop: "{{ active_keys }}"
-    notify: "harmony restart"
+    notify:
+    - "harmony restart"
+    - "nodestate-collector restart"
   when: active_keys is defined and (active_keys | length)>0 and active_keys != current_keys
