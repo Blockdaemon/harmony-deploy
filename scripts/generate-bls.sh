@@ -1,7 +1,6 @@
 #!/bin/bash
 
-TOP=$(realpath $(dirname $0)/..)
-HMY=${TOP}/files/bin/hmy
+. $(dirname $0)/functions
 
 # Generate a given number of bls keys for a given shard
 version="0.0.1"

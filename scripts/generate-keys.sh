@@ -1,7 +1,6 @@
 #!/bin/bash
 
-TOP=$(realpath $(dirname $0)/..)
-HMY=${TOP}/files/bin/hmy
+. $(dirname $0)/functions
 
 set -e
 if [ $# -ne 1 ]; then

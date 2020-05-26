@@ -1,0 +1,10 @@
+TOP=$(realpath $(dirname $0)/..)
+OS=$(uname -s)
+HMY="${TOP}/files/bin/${OS}/hmy"
+LIBRARY_PATH="${TOP}/files/bin/$OS"
+
+if [ "$OS" = "Linux" ]; then
+    export LD_LIBRARY_PATH=${LIBRARY_PATH}
+else
+    export DYLD_FALLBACK_LIBRARY_PATH=${LIBRARY_PATH}
+fi

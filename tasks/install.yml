@@ -1,7 +1,7 @@
 ---
 - name: Install upstream harmony utils
   copy:
-    src: "files/bin/{{ item }}"
+    src: "files/bin/Linux/{{ item }}"
     dest: "{{ harmony_home }}/"
     owner: "{{ harmony_user }}"
     group: "{{ harmony_user }}"
@@ -12,7 +12,6 @@
     - hmy.sh
     - hmy
     - tui
-    - bootnode
 
 - name: Install harmony libs
   copy:
@@ -22,12 +21,12 @@
     group: "{{ harmony_user }}"
     mode: preserve
   with_fileglob:
-    - files/bin/lib*
+    - files/bin/Linux/lib*
 # notify: harmony restart # harmony is statically linked now
 
 - name: Install harmony checksum file
   copy:
-    src: "files/bin/harmony-checksums.txt"
+    src: "files/bin/Linux/staging/harmony-checksums.txt"
     dest: "{{ harmony_home }}/"
     owner: "{{ harmony_user }}"
     group: "{{ harmony_user }}"
@@ -36,17 +35,19 @@
 
 - name: Install harmony bins to staging
   copy:
-    src: "files/bin/{{ item }}"
+    src: "files/bin/Linux/staging/{{ item }}"
     dest: "{{ harmony_home }}/staging/"
     owner: "{{ harmony_user }}"
     group: "{{ harmony_user }}"
     mode: preserve
   with_items:
+    - bootnode
     - harmony
   register: staging_bins
 
 - name: Transfer harmony bins to live
   include_tasks: update.yml
   with_items:
+    - bootnode
     - harmony
   when: checksums.changed or staging_bins.changed
