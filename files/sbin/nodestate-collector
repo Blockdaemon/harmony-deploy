@@ -197,16 +197,16 @@ class State:
                 to_sign = current['current-epoch-to-sign']
                 if to_sign == 0:
                     # Mark it none if we don't have it so it is cleaned up below.
-                    self.harmony['current-epoch-signing-percent'] = None
+                    self.harmony['current_epoch_signing_percent'] = None
                 else:
                     missed = to_sign-signed
                     if 'missed' in self.harmony and missed >= self.harmony['missed']:
-                        self.harmony['newly-missed'] = missed - self.harmony['missed']
+                        self.harmony['newly_missed'] = missed - self.harmony['missed']
                     else:
                         # Mark it none if we don't have it so it is cleaned up below.
-                        self.harmony['newly-missed'] = None
+                        self.harmony['newly_missed'] = None
                     self.harmony['missed'] = missed
-                    self.harmony['current-epoch-signing-percent'] = {
+                    self.harmony['current_epoch_signing_percent'] = {
                         # make a string so we don't have logstash int/float confusion
                         'str': str(round(signed/to_sign*100, 2)),
                         # make a pct field so we can fix a type with an ES template
