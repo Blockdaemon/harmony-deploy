@@ -15,4 +15,12 @@ if [ "${#sed[@]}" -gt 0 ]; then
     sed=$( IFS=\; ; echo "${sed[*]}")
 fi
 
-${HMY} -n https://api.s0.t.hmny.io blockchain median-stake | jq -cr -f auction.js | grep "$grep" | sed -e "$sed"
+${HMY} -n https://api.s0.t.hmny.io blockchain median-stake | \
+    jq -cr '
+	[ .result["epos-slot-candidates"][] |
+	    {"s": .["stake-per-key"], "v": .validator, "k": .["keys-at-auction"][]}
+	] |
+	sort_by(.s) | reverse |
+	to_entries | map([(.key + 1), .value.v, (.value.s/1e+18)]) | .[]
+    ' | \
+    grep "$grep" | sed -e "$sed"

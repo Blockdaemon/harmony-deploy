@@ -20,3 +20,4 @@
 /hosts
 /credentials
 /clouds/local.env
+/scripts/bls-tool.yaml
