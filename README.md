@@ -1,6 +1,6 @@
 # Harmony ansible deployment
 
-Copy `hosts-example` to `hosts` and configure the remote hosts
+Copy `hosts-example` to `credentials/hosts` and configure the remote hosts
 
 Install BLS key(s) to `credentials/<hostname>/bls/<pubkey>.key`
 

@@ -17,7 +17,6 @@
 /files/bin/staging
 /files/bin/txgen
 /files/bin/tui
-/hosts
 /credentials
 /clouds/local.env
 /scripts/bls-tool.yaml
