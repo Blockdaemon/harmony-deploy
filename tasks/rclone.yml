@@ -1,24 +1,10 @@
-- name: Make rclone config directory
-  file:
-    path: "{{ harmony_home }}/.config/rclone"
-    state: directory
-    mode: '0755'
+  - name: Check if we have shard {{ shard }} db
+    stat:
+      path: "{{ harmony_home }}/harmony_db_{{ shard }}/LOCK"
+    register: db
 
-- name: Configure rclone
-  copy:
-    src: "rclone.conf"
-    dest: "{{ harmony_home }}/.config/rclone/rclone.conf"
-    owner: "{{ harmony_user }}"
-    group: "{{ harmony_user }}"
-    mode: '0644'
-
-- name: Check if we have shard 0 db
-  stat:
-    path: "{{ harmony_home }}/harmony_db_0/LOCK"
-  register: db
-
-- name: rclone db0
-  become: true
-  become_user: "{{ harmony_user }}"
-  command: rclone sync -P hmy://pub.harmony.one/mainnet.min/harmony_db_0 {{ harmony_home }}/harmony_db_0
-  when: not db.stat.exists
+  - name: rclone db{{ shard }}
+    become: true
+    become_user: "{{ harmony_user }}"
+    command: "rclone sync -P hmy://pub.harmony.one/mainnet.min/harmony_db_{{ shard }} {{ harmony_home }}/harmony_db_{{ shard }}"
+    when: not db.stat.exists

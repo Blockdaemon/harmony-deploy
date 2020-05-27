@@ -5,9 +5,6 @@
 - import_tasks: user.yml
   tags: [system, user]
 
-- import_tasks: rclone.yml
-  tags: rclone
-
 - name: Looking for {{ dev_bindir }}/harmony
   local_action: stat path="{{ dev_bindir }}/harmony"
   register: dev_bin
@@ -25,10 +22,13 @@
   tags: dev
 
 - import_tasks: bls.yml
-  tags: bls
+  tags: [bls, dev]
 
 - import_tasks: daemon.yml
   tags: [daemon, dev]
+
+- import_tasks: db.yml
+  tags: [db, dev]
 
 - import_tasks: install.yml
   tags: [install, dev]

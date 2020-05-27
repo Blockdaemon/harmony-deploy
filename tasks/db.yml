@@ -1,0 +1,20 @@
+---
+- name: Get list of available keys
+  set_fact:
+    db_keys: "{{ (db_keys | default([])) + [(item | basename | splitext)[0]] }}"
+  with_fileglob:
+  - "credentials/{{ ansible_hostname }}/bls/*.key"
+
+- name: Get our shard
+  set_fact:
+    db_shard: "{{ (('0x'+db_keys[0][-1]) | int(base=16))%4 }}"
+
+- name: Calculate which DBs we need
+  set_fact:
+    shards: "{{ ([0] + [db_shard]) | unique }}"
+
+- name: Try to rclone shards "{{ shards | join(', ') }}"
+  include_tasks: rclone.yml
+  vars:
+    shard: "{{ item }}"
+  loop: "{{ shards }}"
