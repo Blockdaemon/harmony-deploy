@@ -99,6 +99,7 @@ generate_keys() {
       keys+=("${bls_key}")
       ((generated++))
       mkdir -p shard-${shard}/
+      chmod 600 ${bls_key}.key
       mv ${bls_key}.key shard-${shard}/
     else
       rm -rf ${bls_key}.key
@@ -110,6 +111,8 @@ generate_keys() {
 
     for key in "${keys[@]}"; do
       echo "${key}"
+      touch shard-${shard}/${key}.pass
+      chmod 600 shard-${shard}/${key}.pass
     done
   fi
 
