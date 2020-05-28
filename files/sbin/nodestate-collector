@@ -191,20 +191,19 @@ class State:
                     self.harmony['validator'][i] = v[i]
             if 'total-delegation' in v:
                 self.harmony['validator']['total-delegation'] = v['total-delegation']/1.0E18
+
+            # Mark none by default so if we don't have it it is cleaned up below.
+            self.harmony['current_epoch_signing_percent'] = None
+            self.harmony['newly_missed'] = None
+
             if 'current-epoch-performance' in v:
                 current = v['current-epoch-performance']['current-epoch-signing-percent']
                 signed = float(current['current-epoch-signed'])
                 to_sign = current['current-epoch-to-sign']
-                if to_sign == 0:
-                    # Mark it none if we don't have it so it is cleaned up below.
-                    self.harmony['current_epoch_signing_percent'] = None
-                else:
+                if to_sign > 0:
                     missed = to_sign-signed
                     if 'missed' in self.harmony and missed >= self.harmony['missed']:
                         self.harmony['newly_missed'] = missed - self.harmony['missed']
-                    else:
-                        # Mark it none if we don't have it so it is cleaned up below.
-                        self.harmony['newly_missed'] = None
                     self.harmony['missed'] = missed
                     self.harmony['current_epoch_signing_percent'] = {
                         # make a string so we don't have logstash int/float confusion
