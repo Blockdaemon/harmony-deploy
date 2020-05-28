@@ -4,6 +4,8 @@ import os
 import time
 import json, requests
 
+seconds_per_block=9.4
+
 def print_err(*args):
     print(*args, file=sys.stderr, flush=True)
 
@@ -46,7 +48,7 @@ block = get_hmy_block_number()
 info = get_hmy_get_staking_network_info()
 #print(json.dumps(info))
 blocks_left = info['epoch-last-block'] - block
-secs = blocks_left*9
+secs = blocks_left*seconds_per_block
 print(f"{blocks_left} blocks to go, {timer(secs)}")
 when = time.time() + secs
 print(time.ctime(when))
