@@ -4,7 +4,7 @@ import os
 import time
 import json, requests
 
-seconds_per_block=9.4
+seconds_per_block=8.6
 
 def print_err(*args):
     print(*args, file=sys.stderr, flush=True)
