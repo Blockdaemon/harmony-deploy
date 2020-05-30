@@ -26,7 +26,7 @@ update() {
     fi
 
     echo "[updating using patched node-${os}.sh]"
-    > md5sum.txt        # force download, and workaround funny bug
+    #> staging/md5sum.txt        # force download
     sed -e 's/uname -s/echo Linux/' node.sh > node-${os}.sh
     bash ./node-${os}.sh -d
 
