@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import os
+import os, sys
 import time
 import json, requests
 
-seconds_per_block=8.6
+seconds_per_block = 8.5
+block_sample_gap = 1000
 
 def print_err(*args):
     print(*args, file=sys.stderr, flush=True)
@@ -35,6 +36,12 @@ def get_hmy_block_number(url=None):
         return
     return resp['result']
 
+def get_hmy_block(num, url=None):
+    resp = json_rpc(url, "hmyv2_getBlockByNumber", params=[num,{}])
+    if not 'result' in resp:
+        print_err("getBlockByNumber", resp)
+        return
+    return resp['result']
 
 def get_hmy_get_staking_network_info(url=None):
     resp = json_rpc(url, "hmyv2_getStakingNetworkInfo", params=[-1])
@@ -45,11 +52,20 @@ def get_hmy_get_staking_network_info(url=None):
 
 block = get_hmy_block_number()
 #print(block)
+
+now = get_hmy_block(block)
+then = get_hmy_block(block-block_sample_gap)
+if 'timestamp' in now and 'timestamp' in then:
+    #print(now['timestamp'])
+    #print(then['timestamp'])
+    elapsed = now['timestamp']-then['timestamp']
+    seconds_per_block = float(elapsed)/block_sample_gap
+
 info = get_hmy_get_staking_network_info()
 #print(json.dumps(info))
 blocks_left = info['epoch-last-block'] - block
 secs = blocks_left*seconds_per_block
-print(f"{blocks_left} blocks to go, {timer(secs)}")
+print(f"{blocks_left} blocks to go, {timer(secs)} (@{seconds_per_block}/sec)")
 when = time.time() + secs
 print(time.ctime(when))
 
