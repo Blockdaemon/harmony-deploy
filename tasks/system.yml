@@ -24,14 +24,6 @@
 #     backup: yes
 #   notify: "systemd-journald restart"
 
-  - name: Increase default nofiles for systemd services
-    replace:
-      path: /etc/systemd/system.conf
-      regexp: '^#*DefaultLimitNOFILE=.*'
-      replace: 'DefaultLimitNOFILE=65535'
-      backup: yes
-    notify: "systemd reload"
-
   - name: Install aptitude, dnsutils, jq, rclone, vim
     apt:
       name: [ aptitude, dnsutils, jq, rclone, vim ]

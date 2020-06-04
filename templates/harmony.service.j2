@@ -12,6 +12,8 @@ PermissionsStartOnly=true
 ExecStart=/usr/local/sbin/harmonyd
 #ExecStopPost=/bin/rm -f /run/harmonyd/harmonyd.pid
 Restart=on-failure
+LimitNOFILE=65536
+LimitNPROC=65536
 
 [Install]
 WantedBy=multi-user.target
