@@ -63,6 +63,8 @@ if 'timestamp' in now and 'timestamp' in then:
 
 info = get_hmy_get_staking_network_info()
 #print(json.dumps(info))
+# update block, may have taken some times :)
+block = get_hmy_block_number()
 blocks_left = info['epoch-last-block'] - block
 secs = blocks_left*seconds_per_block
 print(f"{blocks_left} blocks to go, {timer(secs)} (@{seconds_per_block}/sec)")
