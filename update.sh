@@ -16,7 +16,7 @@ update() {
         chmod +x $(basename $i)
     done
 
-    echo "[updating hmy]"
+    echo "[updating hmy using patched hmy-${os}.sh]"
     sed -e "s/curl /curl -sS /;s/uname -s/echo ${os}/" hmy.sh > hmy-${os}.sh
     bash ./hmy-${os}.sh -d
     if dd if=hmy count=1 bs=300 2>/dev/null | grep Error; then
@@ -27,7 +27,7 @@ update() {
 
     echo "[updating using patched node-${os}.sh]"
     #> staging/md5sum.txt        # force download
-    sed -e 's/uname -s/echo Linux/' node.sh > node-${os}.sh
+    sed -e "s/uname -s/echo ${os}/" node.sh > node-${os}.sh
     bash ./node-${os}.sh -d
 
     echo "[checking result]"
