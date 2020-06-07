@@ -39,6 +39,7 @@ def main():
         addrs = yaml.load(file, Loader=yaml.FullLoader)
         #print(json.dumps(addrs))
     snapshot = get_hmy_median_raw_stake_snapshot()
+    median = float(snapshot['epos-median-stake'])
     candidates = snapshot['epos-slot-candidates']
     for i,c in enumerate(candidates):
         v = c['validator']
@@ -62,10 +63,11 @@ def main():
     for c in candidates:
         l = c['len']
         if 'name' in c:
+            pct_of_median = round(c['stake-per-key']*100.0/median)
             if l>1:
-                print(f"{i}-{i+l-1}: {c['name']} x{l}")
+                print(f"{i}-{i+l-1}: {c['name']} ({pct_of_median}%) x{l}")
             else:
-                print(f"  {i}: {c['name']}")
+                print(f"  {i}: {c['name']} ({pct_of_median}%)")
         i += l
 
 if __name__ == "__main__":
