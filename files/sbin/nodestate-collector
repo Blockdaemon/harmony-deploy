@@ -177,6 +177,10 @@ class State:
         elif self.blocks_behind > 10:
             self.bump_level('warn')
 
+        if self.blocks_behind > 1:
+            self.status = 'Syncing'
+            self.message = f"{self.status}: {self.blocks_behind} blocks behind"
+
         latest_block = get_hmy_block(self.block_number)
         if latest_block!=None and 'hash' in latest_block:
             self.latest_hash = latest_block['hash']
