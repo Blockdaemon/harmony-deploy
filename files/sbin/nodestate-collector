@@ -121,6 +121,12 @@ class State:
         self.blocks_behind = None
         self.latest_hash = None
         self.latest_block_time = None
+        self.is_validator = True
+        self.current_epoch = None
+        self.last_validated_block_number = None
+        self.last_validated_block_hash = None
+        self.latest_validated_block_time = None
+
         self.status = "Offline"
         self.message = "Offline"
 
@@ -156,9 +162,14 @@ class State:
 
         self.peer_count = meta['p2p-connectivity']['connected']
         self.block_number = get_hmy_block_number(old=self.block_number)
+        self.current_epoch = meta['current-epoch']
+
+        # TODO
+        #self.last_validated_block_number =
+        #self.last_validated_block_hash =
+        #self.latest_validated_block_time =
 
         self.harmony['blskeys'] = ','.join(meta['blskey'])
-        self.harmony['epoch'] = meta['current-epoch']
         shard = meta['shard-id']
         if shard<0:
             print_err("Failed to find shard")
