@@ -1,0 +1,16 @@
+- name: Make harmony nodestate collector directory
+  file:
+    path: "{{ nodestate_home }}"
+    state: directory
+    owner: "{{ harmony_user }}"
+    group: "{{ harmony_user }}"
+    mode: '0755'
+
+- name: Install harmony nodestate-collector
+  copy:
+    src: "sbin/nodestate-collector"
+    dest: "/usr/local/sbin/"
+    mode: '0755'
+    owner: root
+    group: root
+  notify: "nodestate-collector restart"

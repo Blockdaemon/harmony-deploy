@@ -21,14 +21,22 @@
   when: dev_bin.stat.exists and is_dev
   tags: dev
 
+# install bls keys
 - import_tasks: bls.yml
   tags: [bls, dev]
 
-- import_tasks: daemon.yml
-  tags: [daemon, dev]
-
+# get shard snapshots
 - import_tasks: db.yml
   tags: [db, dev]
 
+# install harmony binaries
 - import_tasks: install.yml
   tags: [install, dev]
+
+# install nodestate collector
+- import_tasks: nodestate.yml
+  tags: [nodestate, dev]
+
+# set up systemd unit files and enable them
+- import_tasks: daemon.yml
+  tags: [daemon, dev]
