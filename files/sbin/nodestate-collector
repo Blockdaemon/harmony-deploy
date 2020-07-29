@@ -230,6 +230,8 @@ class State:
                 l = v['lifetime']
                 if 'epoch-apr' in l:
                     del l['epoch-apr']
+                if 'epoch-blocks' in l:
+                    del l['epoch-blocks']
                 if 'reward-accumulated' in l:
                     l['reward-accumulated'] = l['reward-accumulated']/1.0E18
                 self.harmony['validator']['lifetime'] = l
