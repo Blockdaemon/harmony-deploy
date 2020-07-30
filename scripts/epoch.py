@@ -4,7 +4,7 @@ import os, sys
 import time
 import json, requests
 
-seconds_per_block = 8.5
+seconds_per_block = 5.0
 block_sample_gap = 1000
 
 def print_err(*args):
