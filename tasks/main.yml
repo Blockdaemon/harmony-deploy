@@ -31,7 +31,7 @@
 
 # install harmony binaries
 - import_tasks: install.yml
-  tags: [install, dev]
+  tags: [harmony, dev]
 
 # install nodestate collector
 - import_tasks: nodestate.yml

@@ -46,7 +46,7 @@ if [ -d "blskeys" ]; then
     msg "INFO: found BLS folder"
     BLSKEY="-blsfolder blskeys"
     BLSPASS="-blspass file:/dev/null"
-    #BLSPASS="-blspass none" # Doesn't work yet
+    #BLSPASS="-blspass none" # Apparently not equivalent to file:/dev/null
 else
     err "no BLS folder"
 fi
