@@ -45,8 +45,11 @@
     mode: '0644'
     owner: root
     group: root
-  notify: "systemd reload"
   loop: [ harmony, nodestate-collector ]
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
 
 - name: Enable harmony and nodestate-collector unit files
   systemd:
@@ -54,3 +57,4 @@
     enabled: yes
     masked: no
   loop: [ harmony, nodestate-collector ]
+  notify: "harmony restart"
