@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: "{{ inventory | default('all') }}"
   become: true
   gather_facts: true
   pre_tasks:
