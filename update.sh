@@ -11,7 +11,7 @@ update() {
       chmod +x $i
     done
 
-    for i in go-sdk/master/scripts/hmy.sh harmony-ops/master/monitoring/mystatus.sh; do
+    for i in go-sdk/master/scripts/hmy.sh; do
         curl -SsLO https://raw.githubusercontent.com/harmony-one/$i
         chmod +x $(basename $i)
     done
