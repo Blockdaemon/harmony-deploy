@@ -16,15 +16,11 @@
       backup: yes
     notify: "systemd-journald restart"
 
-# - name: Nuke journald console output
-#   replace:
-#     path: /etc/systemd/journald.conf
-#     regexp: '^#*TTYPath=.*'
-#     replace: 'TTYPath=/dev/null'
-#     backup: yes
-#   notify: "systemd-journald restart"
-
-  - name: Install aptitude, dnsutils, jq, rclone, vim
+  - name: Install aptitude, dnsutils, jq, vim
     apt:
-      name: [ aptitude, dnsutils, jq, rclone, vim ]
+      name: [ aptitude, dnsutils, jq, vim ]
       update_cache: yes
+
+  - name: Install latest rclone
+    apt:
+      deb: https://downloads.rclone.org/v1.52.3/rclone-v1.52.3-linux-amd64.deb
