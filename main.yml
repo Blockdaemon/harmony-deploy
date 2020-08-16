@@ -1,6 +1,6 @@
 ---
 - name: "Run role as a playbook"
-  hosts: all
+  hosts: "{{ inventory | default('all') }}"
   become: true
 
   pre_tasks:
