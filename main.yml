@@ -5,6 +5,7 @@
 
   pre_tasks:
   - name: "Get git tag"
+    become: false
     shell: git describe --tags --abbrev=4 --dirty --always
     register: git_describe
     delegate_to: localhost
