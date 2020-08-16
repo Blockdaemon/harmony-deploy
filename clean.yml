@@ -13,8 +13,9 @@
     register: harmony_stopped
 
   - name: Remove db, latest, staging, and .hmykey
+    become: true
     become_user: harmony
-    shell: "rm -rf {{ harmony_home }}/harmony_db_* {{ harmony_home }}/latest/* {{ harmony_home}}/staging/* {{ harmony_home }}/.hmykey"
+    shell: "rm -rf {{ harmony_home }}/harmony_db_* {{ harmony_home }}/latest/* {{ harmony_home }}/staging/* {{ harmony_home }}/.hmykey"
     args:
       warn: no
 
