@@ -44,9 +44,9 @@ msg "INFO: starting up"
 
 if [ -d "blskeys" ]; then
     msg "INFO: found BLS folder"
-    BLSKEY="-blsfolder blskeys"
-    BLSPASS="-blspass file:/dev/null"
-    #BLSPASS="-blspass none" # Apparently not equivalent to file:/dev/null
+    BLSKEY="--blsfolder blskeys"
+    BLSPASS="--blspass file:/dev/null"
+    #BLSPASS="--blspass none" # Apparently not equivalent to file:/dev/null
 else
     err "no BLS folder"
 fi
@@ -85,29 +85,29 @@ myip
 
 # from upstream
 args=(
-    -bootnodes "${BN_MA}"
-    -ip "${PUB_IP}"
-    -port "${NODE_PORT}"
-    -network_type="${network_type}"
-    -dns_zone="${dns_zone}"
-    -blacklist="${blacklist}"
-    -min_peers="${minpeers}"
-    -max_bls_keys_per_node="${max_bls_keys_per_node}"
-    -broadcast_invalid_tx="${broadcast_invalid_tx}"
-    -verbosity="${log_level}"
-    -block_period="5"
+    --bootnodes "${BN_MA}"
+    --ip "${PUB_IP}"
+    --port "${NODE_PORT}"
+    --network_type="${network_type}"
+    --dns_zone="${dns_zone}"
+    --blacklist="${blacklist}"
+    --min_peers="${minpeers}"
+    --max_bls_keys_per_node="${max_bls_keys_per_node}"
+    --broadcast_invalid_tx="${broadcast_invalid_tx}"
+    --verbosity="${log_level}"
+    --block_period="5"
 )
 
 # our local args
 exe=(
     ./harmony${DEV}
     ${MODE} ${BLSKEY} ${BLSPASS}
-    -shard_id="${SHARD_ID}" -log_max_size=100
+    --shard_id="${SHARD_ID}" --log_max_size=100
 )
 
 rm -rf .dht-* # NTL lets be rude; remove DHT cache
 
 msg "INFO: ${exe[@]} ${args[@]}"
-LD_LIBRARY_PATH=. exec ${exe[@]} ${args[@]}
+exec ${exe[@]} ${args[@]}
 
 # vim: ts=8:sw=4

@@ -2,7 +2,7 @@ rclone_version: v1.52.3
 
 harmony_user: harmony
 harmony_home: /data/harmony
-harmony_mode: "-staking"
+harmony_mode: ""
 harmony_dev: ""
 
 nodestate_home: /data/nodestate

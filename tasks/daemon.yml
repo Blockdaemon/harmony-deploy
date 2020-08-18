@@ -1,7 +1,7 @@
 ---
 - name: "***** EXPLORER *****"
   set_fact:
-    harmony_mode: "-node_type explorer -public_rpc"
+    harmony_mode: "--node_type explorer --public_rpc"
   when: is_explorer
 
 #- name: Make harmony logfile directory

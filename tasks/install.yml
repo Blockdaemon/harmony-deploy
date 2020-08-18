@@ -8,7 +8,6 @@
     mode: preserve
   with_items:
     - node.sh
-    - mystatus.sh
     - hmy.sh
     - hmy
     - tui
