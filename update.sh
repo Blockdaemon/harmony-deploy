@@ -26,7 +26,9 @@ update() {
     fi
 
     echo "[updating using patched node-${os}.sh]"
-    #> staging/md5sum.txt        # force download
+    if $CLEAN; then
+       > staging/md5sum.txt        # force download
+    fi
     sed -e "s/uname -s/echo ${os}/" node.sh > node-${os}.sh
     bash ./node-${os}.sh -d
 
@@ -55,6 +57,27 @@ update() {
 
     popd > /dev/null
 }
+
+usage() {
+   cat<<-EOT
+Usage: $0 [options]
+
+Options:
+   -c       force re-download harmony binary
+   -h       print this help message
+
+EOT
+   exit 0
+}
+
+CLEAN=false
+
+while getopts ":ch" opt; do
+   case $opt in
+      c) CLEAN=true;;
+      *) usage;;
+   esac
+done
 
 update Linux
 if [ "${OS}" != "Linux" ]; then
