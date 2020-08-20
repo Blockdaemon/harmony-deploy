@@ -1,10 +1,4 @@
 ---
-- name: Make harmony home directory parent
-  file:
-    path: '{{ harmony_home.split("/")[0:-1]|join("/") }}'
-    state: directory
-    mode: '0755'
-
 - name: Add harmony user
   user:
     name: "{{ harmony_user }}"
