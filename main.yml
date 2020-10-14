@@ -10,5 +10,6 @@
     register: git_describe
     delegate_to: localhost
     tags: dev
+    changed_when: false
 
   roles: [ main ]
