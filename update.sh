@@ -84,3 +84,5 @@ if [ "${OS}" != "Linux" ]; then
   echo "Not on Linux. Downloading native files"
   update "${OS}"
 fi
+
+./files/bin/Linux/staging/harmony --version
