@@ -44,7 +44,7 @@ def get_hmy_block(num, url=None):
     return resp['result']
 
 def get_hmy_get_staking_network_info(url=None):
-    resp = json_rpc(url, "hmyv2_getStakingNetworkInfo", params=[-1])
+    resp = json_rpc(url, "hmyv2_getStakingNetworkInfo")
     if not 'result' in resp:
         print_err("getStakingNetworkInfo", resp)
         return
