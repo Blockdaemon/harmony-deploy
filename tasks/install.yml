@@ -1,41 +1,15 @@
 ---
-- name: Install upstream harmony utils
-  copy:
-    src: "files/bin/Linux/{{ item }}"
-    dest: "{{ harmony_home }}/"
-    owner: "{{ harmony_user }}"
-    group: "{{ harmony_user }}"
-    mode: preserve
-  with_items:
-    - node.sh
-    - hmy.sh
-    - hmy
-    - tui
-
-- name: Install harmony checksum file
-  copy:
-    src: "files/bin/Linux/staging/harmony-checksums.txt"
-    dest: "{{ harmony_home }}/"
-    owner: "{{ harmony_user }}"
-    group: "{{ harmony_user }}"
-    mode: preserve
-  register: checksums
-
-- name: Install harmony bins to staging
-  copy:
-    src: "files/bin/Linux/staging/{{ item }}"
+- name: Install harmony binary to staging
+  get_url:
+    url: "https://github.com/harmony-one/harmony/releases/download/v{{ harmony_version }}/harmony"
     dest: "{{ harmony_home }}/staging/"
     owner: "{{ harmony_user }}"
     group: "{{ harmony_user }}"
-    mode: preserve
-  with_items:
-    - bootnode
-    - harmony
-  register: staging_bins
+    mode: 0755
+  register: staging_bin
 
 - name: Transfer harmony bins to live
   include_tasks: update.yml
   with_items:
-    - bootnode
     - harmony
-  when: checksums.changed or staging_bins.changed
+  when: staging_bin.changed

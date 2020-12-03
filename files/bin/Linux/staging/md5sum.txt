@@ -1,3 +1,0 @@
-61d898e5c4747c0bb1b73c5e135b9315  harmony
-36f11a4cc876f862ae4bd120205900d3  bootnode
-513992100a6c3aeaec9fbf78bb3b0f0c  node.sh

@@ -18,25 +18,6 @@ Secure credentials
 chmod og-rx -R credentials
 ```
 
-## Update binaries from upstream, push to hosts
-
-Note that this downloads binaries to your local machine, and the role installs
-those binaries.
-
-```bash
-./update.sh
-ansible-playbook main.yml
-```
-
-`./update.sh` downloads binaries native to where it is run, and on MacOS this
-means it downloads binaries that cannot be deployed to our nodes.
-
-**NOTE: If `BN_MA` changes in `node.sh`, update `files/sbin/harmonyd`**
-
-All other changes in `node.sh` (e.g. arguments etc) need to be updated in files/sbin/harmonyd
-
-On a new install this will NOT automatically start harmony! To do that:
-
 ## Start/restart Harmony
 
 ```bash
@@ -93,14 +74,14 @@ git clone git@github.com:harmony-one/bls
 git clone git@github.com:harmony-one/mcl
 ```
 
-## Check out our fork and upstream u3
+## Check out our fork and upstream s3
 
 ```bash
 git clone git@github.com:Blockdaemon/harmony.git
 cd harmony
 git remote add upstream git@github.com:harmony-one/harmony
 git fetch --all
-git checkout -b u3 upstream/u3
+git checkout -b s3 upstream/s3
 ```
 
 ## Build
@@ -125,5 +106,5 @@ git remote prune upstream
 git remote prune origin
 git checkout go.mod
 git checkout master && git rebase upstream/master
-git checkout u3 && git rebase upstream/u3
+git checkout s3 && git rebase upstream/s3
 ```

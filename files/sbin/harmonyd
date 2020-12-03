@@ -71,7 +71,8 @@ function valid_ip()
 
 function myip() {
 # get ipv4 address only, right now only support ipv4 addresses
-   PUB_IP=$(dig -4 @resolver1.opendns.com ANY myip.opendns.com +short)
+   #PUB_IP=$(dig -4 @resolver1.opendns.com ANY myip.opendns.com +short)
+   PUB_IP=$(curl -Ss ifconfig.me)
    if valid_ip $PUB_IP; then
       msg "INFO: public IP address autodetected: $PUB_IP"
    else

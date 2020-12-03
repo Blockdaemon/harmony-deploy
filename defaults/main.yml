@@ -1,4 +1,5 @@
-rclone_version: v1.52.3
+harmony_version: 3.0.0
+rclone_version: v1.53.3
 
 harmony_user: harmony
 harmony_home: /data/harmony
