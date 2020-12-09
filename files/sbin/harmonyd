@@ -96,7 +96,6 @@ args=(
     --max_bls_keys_per_node="${max_bls_keys_per_node}"
     --broadcast_invalid_tx="${broadcast_invalid_tx}"
     --verbosity="${log_level}"
-    --block_period="5"
 )
 
 # our local args
