@@ -54,7 +54,7 @@ ansible-playbook nuke.yml
 Edit `hosts` and adjust the `wallet_home` fact to taste.
 
 ```bash
-ansible-playbook fetch.yml
+ansible-playbook fetch-keys.yml
 ```
 
 ## To check balances on the node
